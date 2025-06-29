@@ -1,6 +1,5 @@
 import React from 'react';
 import { Event, Member, AvailabilityStatus } from '../types';
-import { useClubData } from '../hooks/useClubData';
 import MemberAvatar from './MemberAvatar';
 import AvailabilityButtons from './AvailabilityButtons';
 import { ICONS } from '../constants';

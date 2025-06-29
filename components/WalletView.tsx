@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { useClubData } from '../hooks/useClubData';
+import { useClubDataContext } from '../hooks/ClubDataContext';
 import { View, Transaction } from '../types';
 
 interface MyAccountViewProps {
-    clubData: ReturnType<typeof useClubData>;
     setCurrentView: (view: View) => void;
 }
 
-const MyAccountView: React.FC<MyAccountViewProps> = ({ clubData, setCurrentView }) => {
-    const { currentUser, transactions, toggleNtfConsent, agreeToPolicies, updateMemberDetails, deleteCurrentUser, ADMIN_ID } = clubData;
+const MyAccountView: React.FC<MyAccountViewProps> = ({ setCurrentView }) => {
+    const { currentUser, transactions, toggleNtfConsent, agreeToPolicies, updateMemberDetails, deleteCurrentUser, ADMIN_ID } = useClubDataContext();
 
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState(currentUser.name);

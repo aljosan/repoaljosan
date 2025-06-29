@@ -1,11 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { Survey, SurveyResponse, Member, SurveyQuestion } from '../types';
-import { useClubData } from '../hooks/useClubData';
+import { useClubDataContext } from '../hooks/ClubDataContext';
 
-interface SurveysViewProps {
-    clubData: ReturnType<typeof useClubData>;
-}
+interface SurveysViewProps {}
 
 const SurveyResults: React.FC<{ survey: Survey, responses: SurveyResponse[] }> = ({ survey, responses }) => {
     const totalResponses = responses.length;
@@ -93,8 +91,8 @@ const SurveyForm: React.FC<{ survey: Survey, onSubmit: (answers: { questionId: s
 };
 
 
-const SurveysView: React.FC<SurveysViewProps> = ({ clubData }) => {
-    const { surveys, surveyResponses, currentUser, submitSurveyResponse } = clubData;
+const SurveysView: React.FC<SurveysViewProps> = () => {
+    const { surveys, surveyResponses, currentUser, submitSurveyResponse } = useClubDataContext();
     const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
 
     const userResponses = useMemo(() => {
