@@ -1,14 +1,10 @@
 import React from 'react';
-import { useClubData } from '../hooks/useClubData';
+import { useClubDataContext } from '../hooks/ClubDataContext';
 import NtfIntegration from './NtfIntegration';
 import AdminCreditManagement from './AdminCreditManagement';
 
-interface SettingsViewProps {
-    clubData: ReturnType<typeof useClubData>;
-}
-
-const SettingsView: React.FC<SettingsViewProps> = ({ clubData }) => {
-    const { currentUser, ADMIN_ID } = clubData;
+const SettingsView: React.FC = () => {
+    const { currentUser, ADMIN_ID } = useClubDataContext();
     
     if (currentUser.id !== ADMIN_ID) {
         return (
@@ -26,8 +22,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({ clubData }) => {
                 <p className="mt-2 text-slate-600">Manage club integrations and other administrative tasks.</p>
             </div>
             
-            <AdminCreditManagement clubData={clubData} />
-            <NtfIntegration clubData={clubData} />
+            <AdminCreditManagement />
+            <NtfIntegration />
         </div>
     );
 };
