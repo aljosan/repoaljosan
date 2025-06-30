@@ -8,7 +8,7 @@ interface CoachBookingCalendarProps {
     lessonBookings: LessonBooking[];
     addLessonBooking: (coachId: string, memberId: string, startTime: Date) => LessonBooking | null;
     onPayForLessonBooking: (lessonId: string, method: PaymentMethod) => boolean;
-    currentUser: Member;
+    currentUser: Member | null;
     courts: Court[];
     regularBookings: Booking[];
     members: Member[];
@@ -40,6 +40,7 @@ const CoachBookingCalendar: React.FC<CoachBookingCalendarProps> = ({ coach, less
         const startTime = new Date(selectedDate);
         startTime.setHours(bookingSlot, 0, 0, 0);
 
+        if (!currentUser) return;
         const newLesson = addLessonBooking(coach.id, currentUser.id, startTime);
         if (newLesson) {
             setLessonForPayment(newLesson);

@@ -23,7 +23,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, allMembers, currentUser, o
   const attendees = getAttendees(AvailabilityStatus.ATTENDING);
   const maybes = getAttendees(AvailabilityStatus.MAYBE);
   
-  const currentUserAvailability = event.availability.find(a => a.memberId === currentUser.id)?.status || AvailabilityStatus.PENDING;
+  const currentUserAvailability = currentUser ? (event.availability.find(a => a.memberId === currentUser.id)?.status || AvailabilityStatus.PENDING) : AvailabilityStatus.PENDING;
 
   const eventTypeColors = {
     Match: 'bg-club-primary text-white',
@@ -52,10 +52,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, allMembers, currentUser, o
         
         <div className="mt-6">
             <h4 className="font-semibold text-slate-800">Your Availability:</h4>
-            <AvailabilityButtons 
+            {currentUser && (
+              <AvailabilityButtons
                 currentStatus={currentUserAvailability}
                 onSetStatus={(status) => onUpdateAvailability(event.id, currentUser.id, status)}
-            />
+              />
+            )}
         </div>
 
       </div>

@@ -4,7 +4,7 @@ import MemberAvatar from './MemberAvatar';
 
 interface ChallengeCardProps {
     challenge: Challenge;
-    currentUser: Member;
+    currentUser: Member | null;
     allMembers: Member[];
     onRespond: (challengeId: string, response: 'accept' | 'decline') => void;
     onReportClick: (challenge: Challenge) => void;
@@ -16,7 +16,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, currentUser, a
     const challenged = allMembers.find(m => m.id === challenge.challengedId);
     if (!challenger || !challenged) return null;
 
-    const isCurrentUserChallenger = currentUser.id === challenger.id;
+    const isCurrentUserChallenger = currentUser ? currentUser.id === challenger.id : false;
 
     const renderActions = () => {
         if (challenge.status === ChallengeStatus.PENDING && !isCurrentUserChallenger) {

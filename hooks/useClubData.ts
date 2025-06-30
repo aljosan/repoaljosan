@@ -1,12 +1,13 @@
 
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { 
     Event, Member, AvailabilityStatus, EventType, MemberAvailability, Court, Booking, CourtType, 
     Survey, SurveyResponse, Post, Coach, LessonBooking, Group, GroupMessage, LadderPlayer, Challenge, 
     ChallengeStatus, PartnerRequest, GameType, RequestStatus, Announcement, Notification, View,
     PaymentStatus, Transaction, Article, ArticleCategory, PaymentMethod
 } from '../types';
+import { loadFromStorage, saveToStorage, clearStorage } from '../services/storageService';
 
 const initialMembers: Member[] = [
   { id: '1', name: 'Alice (Admin)', avatarUrl: 'https://picsum.photos/id/1027/100/100', clubCredits: 500, ntfConsent: true, ntfId: 'NTF-12345', consentAgreedTimestamp: Date.now() - 86400000 * 10 },
@@ -219,9 +220,9 @@ const COURT_PRICE_OUTDOOR = 150;
 const LESSON_PRICE = 600;
 
 export const useClubData = () => {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<Member[]>(loadFromStorage('members', initialMembers));
   const [events, setEvents] = useState<Event[]>(initialEvents);
-  const [currentUser, setCurrentUser] = useState<Member>(initialMembers[0]);
+  const [currentUser, setCurrentUser] = useState<Member | null>(loadFromStorage('currentUser', null));
   const [courts] = useState<Court[]>(initialCourts);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [surveys] = useState<Survey[]>(initialSurveys);
@@ -239,6 +240,14 @@ export const useClubData = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [learningArticles, setLearningArticles] = useState<Article[]>(initialLearningArticles);
   const [ntfSyncStatus, setNtfSyncStatus] = useState<{ lastSync: Date | null, membersSynced: number, membersSkipped: number }>({ lastSync: null, membersSynced: 0, membersSkipped: 0 });
+
+  useEffect(() => {
+    saveToStorage('members', members);
+  }, [members]);
+
+  useEffect(() => {
+    saveToStorage('currentUser', currentUser);
+  }, [currentUser]);
 
   const addNotification = useCallback((memberId: string, message: string, link: View, relatedId?: string) => {
       const newNotification: Notification = {
@@ -295,8 +304,8 @@ export const useClubData = () => {
         const newCredits = member.clubCredits - booking.price;
         const updatedMembers = members.map(m => m.id === member.id ? {...m, clubCredits: newCredits} : m);
         setMembers(updatedMembers);
-        if (member.id === currentUser.id) {
-            setCurrentUser(prev => ({...prev, clubCredits: newCredits}));
+        if (member.id === currentUser?.id && currentUser) {
+            setCurrentUser(prev => prev ? ({...prev, clubCredits: newCredits}) : null);
         }
     }
 
@@ -305,7 +314,7 @@ export const useClubData = () => {
     addTransaction(member.id, `Court Booking: ${court?.name}`, -booking.price, method);
 
     return true;
-  }, [bookings, members, currentUser.id, courts, addTransaction]);
+  }, [bookings, members, currentUser?.id, courts, addTransaction]);
 
   const addLessonBooking = useCallback((coachId: string, memberId: string, startTime: Date): LessonBooking | null => {
     const coachIsBusy = lessonBookings.some(lb => lb.coachId === coachId && lb.startTime.getTime() === startTime.getTime());
@@ -333,8 +342,8 @@ export const useClubData = () => {
           const newCredits = member.clubCredits - lesson.price;
           const updatedMembers = members.map(m => m.id === member.id ? {...m, clubCredits: newCredits} : m);
           setMembers(updatedMembers);
-          if (member.id === currentUser.id) {
-            setCurrentUser(prev => ({...prev, clubCredits: newCredits}));
+          if (member.id === currentUser?.id && currentUser) {
+            setCurrentUser(prev => prev ? ({...prev, clubCredits: newCredits}) : null);
           }
       }
 
@@ -342,7 +351,7 @@ export const useClubData = () => {
       const coach = coaches.find(c => c.id === lesson.coachId);
       addTransaction(member.id, `Lesson: ${coach?.name}`, -lesson.price, method);
       return true;
-  }, [lessonBookings, members, currentUser.id, coaches, addTransaction]);
+  }, [lessonBookings, members, currentUser?.id, coaches, addTransaction]);
 
   const awardCredits = useCallback((memberId: string, amount: number, reason: string) => {
       if (amount <= 0) return;
@@ -355,12 +364,12 @@ export const useClubData = () => {
       });
       setMembers(newMembers);
 
-      if (memberId === currentUser.id) {
-          setCurrentUser(prev => ({...prev, clubCredits: prev.clubCredits + amount}));
+      if (memberId === currentUser?.id && currentUser) {
+          setCurrentUser(prev => prev ? ({...prev, clubCredits: prev.clubCredits + amount}) : null);
       }
 
       addTransaction(memberId, reason, amount, 'Awarded');
-  }, [members, currentUser.id, addTransaction]);
+  }, [members, currentUser?.id, addTransaction]);
   
   const updateAvailability = useCallback((eventId: string, memberId: string, status: AvailabilityStatus) => {
     setEvents(prevEvents => prevEvents.map(event => event.id === eventId ? { ...event, availability: event.availability.map(avail => avail.memberId === memberId ? { ...avail, status } : avail) } : event));
@@ -545,10 +554,10 @@ export const useClubData = () => {
 
   const toggleNtfConsent = useCallback((memberId: string) => {
       setMembers(prev => prev.map(m => m.id === memberId ? { ...m, ntfConsent: !m.ntfConsent } : m));
-      if(currentUser.id === memberId) {
-          setCurrentUser(prev => ({ ...prev, ntfConsent: !prev.ntfConsent }));
+      if(currentUser?.id === memberId && currentUser) {
+          setCurrentUser(prev => prev ? ({ ...prev, ntfConsent: !prev.ntfConsent }) : null);
       }
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   const syncWithNtf = useCallback(async () => {
     // This is a simulation of a backend API call.
@@ -579,21 +588,22 @@ export const useClubData = () => {
   const agreeToPolicies = useCallback((memberId: string) => {
     const timestamp = Date.now();
     setMembers(prev => prev.map(m => m.id === memberId ? { ...m, consentAgreedTimestamp: timestamp } : m));
-    if (currentUser.id === memberId) {
-      setCurrentUser(prev => ({ ...prev, consentAgreedTimestamp: timestamp }));
+    if (currentUser?.id === memberId && currentUser) {
+      setCurrentUser(prev => prev ? ({ ...prev, consentAgreedTimestamp: timestamp }) : null);
     }
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   const updateMemberDetails = useCallback((memberId: string, newDetails: { name: string }) => {
     setMembers(prev => prev.map(m => m.id === memberId ? { ...m, name: newDetails.name } : m));
-    if (currentUser.id === memberId) {
-      setCurrentUser(prev => ({ ...prev, name: newDetails.name }));
+    if (currentUser?.id === memberId && currentUser) {
+      setCurrentUser(prev => prev ? ({ ...prev, name: newDetails.name }) : null);
     }
     // In a real app, we'd also need to update names in notifications, posts etc., or better, have normalized data.
     // For this simulation, this is sufficient.
-  }, [currentUser.id]);
+  }, [currentUser?.id]);
 
   const deleteCurrentUser = useCallback(() => {
+    if (!currentUser) return;
     const memberIdToDelete = currentUser.id;
     if (memberIdToDelete === ADMIN_ID) {
       alert("The admin account cannot be deleted.");
@@ -638,6 +648,17 @@ export const useClubData = () => {
     
   }, [currentUser, members]);
 
+  const login = useCallback((memberId: string) => {
+    const user = members.find(m => m.id === memberId) || null;
+    setCurrentUser(user);
+    saveToStorage('currentUser', user);
+  }, [members]);
+
+  const logout = useCallback(() => {
+    setCurrentUser(null);
+    clearStorage('currentUser');
+  }, []);
+
   return { 
       members, events, currentUser, updateAvailability, courts, bookings, addBooking, 
       surveys, surveyResponses, submitSurveyResponse, posts, addPost, coaches, lessonBookings, 
@@ -650,6 +671,7 @@ export const useClubData = () => {
       learningArticles,
       toggleNtfConsent, syncWithNtf, ntfSyncStatus,
       agreeToPolicies, updateMemberDetails, deleteCurrentUser,
-      createGroup, updateGroup, deleteGroup, moveMemberToGroup
+      createGroup, updateGroup, deleteGroup, moveMemberToGroup,
+      login, logout
   };
 };

@@ -96,13 +96,14 @@ const SurveysView: React.FC<SurveysViewProps> = () => {
     const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
 
     const userResponses = useMemo(() => {
+        if (!currentUser) return [] as typeof surveyResponses;
         return surveyResponses.filter(r => r.memberId === currentUser.id);
-    }, [surveyResponses, currentUser.id]);
+    }, [surveyResponses, currentUser?.id]);
 
     const handleSurveySubmit = (surveyId: string) => (answers: { questionId: string; answer: string; }[]) => {
         submitSurveyResponse({
             surveyId,
-            memberId: currentUser.id,
+            memberId: currentUser!.id,
             answers,
         });
     };

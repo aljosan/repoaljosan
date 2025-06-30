@@ -15,8 +15,8 @@ export const useClubDataContext = () => {
 };
 
 export const useMembers = () => {
-    const { members, currentUser, updateMemberDetails, toggleNtfConsent, agreeToPolicies, deleteCurrentUser } = useClubDataContext();
-    return { members, currentUser, updateMemberDetails, toggleNtfConsent, agreeToPolicies, deleteCurrentUser };
+    const { members, currentUser, updateMemberDetails, toggleNtfConsent, agreeToPolicies, deleteCurrentUser, login, logout } = useClubDataContext();
+    return { members, currentUser, updateMemberDetails, toggleNtfConsent, agreeToPolicies, deleteCurrentUser, login, logout };
 };
 
 export const useBookings = () => {

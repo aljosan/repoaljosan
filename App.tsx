@@ -19,6 +19,7 @@ import { useClubDataContext, useMembers, useBookings, useGroups } from './hooks/
 import { View } from './types';
 import SettingsView from './components/SettingsView';
 import PrivacyPolicyView from './components/PrivacyPolicyView';
+import LoginView from './components/LoginView';
 
 const DashboardView: React.FC = () => {
     const { events, members, currentUser, updateAvailability } = useClubDataContext();
@@ -140,6 +141,7 @@ const PrivacyPolicyPageView: React.FC = () => {
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
     const { currentUser, notifications, markNotificationsAsRead, ADMIN_ID } = useClubDataContext();
+    const { logout } = useMembers();
 
     const renderView = () => {
         switch (currentView) {
@@ -179,25 +181,19 @@ const App: React.FC = () => {
     };
     
     if (!currentUser) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-100">
-                <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-                    <h1 className="text-2xl font-bold text-slate-800">No User Found</h1>
-                    <p className="text-slate-600 mt-2">Could not load user data, or the last user was deleted. The app cannot continue.</p>
-                </div>
-            </div>
-        )
+        return <LoginView />;
     }
 
     return (
         <div className="min-h-screen bg-slate-100 font-sans">
-            <Header 
+            <Header
                 currentView={currentView}
                 setCurrentView={setCurrentView}
                 notifications={notifications}
                 onMarkNotificationsAsRead={markNotificationsAsRead}
                 currentUser={currentUser}
                 adminId={ADMIN_ID}
+                onLogout={logout}
             />
             <main className="max-w-7xl mx-auto py-8 px-2 sm:px-6 lg:px-8">
                 {renderView()}
