@@ -6,12 +6,12 @@ import MemberAvatar from './MemberAvatar';
 interface CommunityViewProps {
     posts: Post[];
     members: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     onAddPost: (authorId: string, textContent: string, videoUrl?: string) => void;
 }
 
 const CreatePostForm: React.FC<{
-    currentUser: Member;
+    currentUser: Member | null;
     onAddPost: (authorId: string, textContent: string, videoUrl?: string) => void;
 }> = ({ currentUser, onAddPost }) => {
     const [textContent, setTextContent] = useState('');
@@ -23,7 +23,9 @@ const CreatePostForm: React.FC<{
             alert("Please write something in your post.");
             return;
         }
-        onAddPost(currentUser.id, textContent, videoUrl);
+        if (currentUser) {
+            onAddPost(currentUser.id, textContent, videoUrl);
+        }
         setTextContent('');
         setVideoUrl('');
     };
@@ -32,14 +34,14 @@ const CreatePostForm: React.FC<{
         <div className="bg-white rounded-lg shadow-md p-5">
             <form onSubmit={handleSubmit}>
                 <div className="flex items-start space-x-4">
-                    <MemberAvatar member={currentUser} size="md" />
+                    {currentUser && <MemberAvatar member={currentUser} size="md" />}
                     <div className="w-full">
                         <textarea
                             value={textContent}
                             onChange={(e) => setTextContent(e.target.value)}
                             className="w-full p-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-club-primary"
                             rows={3}
-                            placeholder={`What's on your mind, ${currentUser.name}?`}
+                            placeholder={currentUser ? `What's on your mind, ${currentUser.name}?` : 'Log in to post'}
                         />
                          <input
                             type="text"

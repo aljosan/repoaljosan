@@ -8,8 +8,9 @@ interface HeaderProps {
   setCurrentView: (view: View) => void;
   notifications: Notification[];
   onMarkNotificationsAsRead: () => void;
-  currentUser: Member;
+  currentUser: Member | null;
   adminId: string;
+  onLogout: () => void;
 }
 
 const DropdownMenuItem: React.FC<{
@@ -34,7 +35,7 @@ const DropdownMenuItem: React.FC<{
 };
 
 
-const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, notifications, onMarkNotificationsAsRead, currentUser, adminId }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, notifications, onMarkNotificationsAsRead, currentUser, adminId, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, notificati
     setIsMenuOpen(false);
   };
   
-  const isAdmin = currentUser.id === adminId;
+  const isAdmin = currentUser ? currentUser.id === adminId : false;
 
   const menuItems = [
     // Club Life
@@ -117,13 +118,18 @@ const Header: React.FC<HeaderProps> = ({ currentView, setCurrentView, notificati
           </div>
 
           <div className="flex items-center space-x-1 sm:space-x-4">
-            <NotificationsBell 
+            <NotificationsBell
               notifications={notifications}
               onMarkAsRead={onMarkNotificationsAsRead}
               setCurrentView={setCurrentView}
             />
-             <div className="w-10 h-10 bg-club-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
-                <span>{currentUser.name.charAt(0)}</span>
+            <div className="flex items-center space-x-2">
+              {currentUser && (
+                <div className="w-8 h-8 bg-club-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  <span>{currentUser.name.charAt(0)}</span>
+                </div>
+              )}
+              <button onClick={onLogout} className="text-sm text-slate-600 hover:underline">Logout</button>
             </div>
           </div>
         </div>

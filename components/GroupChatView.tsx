@@ -7,7 +7,7 @@ interface GroupChatViewProps {
     messages: GroupMessage[];
     onSendMessage: (groupId: string, authorId: string, textContent: string) => void;
     allMembers: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     onBack: () => void;
     coaches: Coach[];
 }
@@ -26,7 +26,7 @@ const GroupChatView: React.FC<GroupChatViewProps> = ({ group, messages, onSendMe
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (newMessage.trim()) {
+        if (newMessage.trim() && currentUser) {
             onSendMessage(group.id, currentUser.id, newMessage.trim());
             setNewMessage('');
         }
@@ -75,7 +75,7 @@ const GroupChatView: React.FC<GroupChatViewProps> = ({ group, messages, onSendMe
                             key={msg.id}
                             message={msg}
                             author={author}
-                            isCurrentUser={author.id === currentUser.id}
+                            isCurrentUser={currentUser ? author.id === currentUser.id : false}
                         />
                     );
                 })}

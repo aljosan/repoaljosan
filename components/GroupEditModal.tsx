@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Group, Member, Coach } from '../types';
+import { Group, Coach } from '../types';
 
 interface GroupEditModalProps {
     isOpen: boolean;

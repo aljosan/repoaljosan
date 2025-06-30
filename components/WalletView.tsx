@@ -9,6 +9,8 @@ interface MyAccountViewProps {
 const MyAccountView: React.FC<MyAccountViewProps> = ({ setCurrentView }) => {
     const { currentUser, transactions, toggleNtfConsent, agreeToPolicies, updateMemberDetails, deleteCurrentUser, ADMIN_ID } = useClubDataContext();
 
+    if (!currentUser) return null;
+
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState(currentUser.name);
 
