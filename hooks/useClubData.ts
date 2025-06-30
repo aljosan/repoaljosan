@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { 
-    Event, Member, AvailabilityStatus, EventType, MemberAvailability, Court, Booking, CourtType, 
+    Event, Member, AvailabilityStatus, EventType, Court, Booking, CourtType,
     Survey, SurveyResponse, Post, Coach, LessonBooking, Group, GroupMessage, LadderPlayer, Challenge, 
     ChallengeStatus, PartnerRequest, GameType, RequestStatus, Announcement, Notification, View,
     PaymentStatus, Transaction, Article, ArticleCategory, PaymentMethod
@@ -238,7 +238,7 @@ export const useClubData = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [learningArticles, setLearningArticles] = useState<Article[]>(initialLearningArticles);
+  const [learningArticles, _setLearningArticles] = useState<Article[]>(initialLearningArticles);
   const [ntfSyncStatus, setNtfSyncStatus] = useState<{ lastSync: Date | null, membersSynced: number, membersSkipped: number }>({ lastSync: null, membersSynced: 0, membersSkipped: 0 });
 
   useEffect(() => {

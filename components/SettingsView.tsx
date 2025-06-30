@@ -6,7 +6,7 @@ import AdminCreditManagement from './AdminCreditManagement';
 const SettingsView: React.FC = () => {
     const { currentUser, ADMIN_ID } = useClubDataContext();
     
-    if (currentUser.id !== ADMIN_ID) {
+    if (!currentUser || currentUser.id !== ADMIN_ID) {
         return (
             <div className="bg-white rounded-lg shadow-lg p-8 text-center">
                 <h2 className="text-2xl font-bold text-red-600">Access Denied</h2>

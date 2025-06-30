@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Survey, SurveyResponse, Member, SurveyQuestion } from '../types';
+import { Survey, SurveyResponse } from '../types';
 import { useClubDataContext } from '../hooks/ClubDataContext';
 
 interface SurveysViewProps {}

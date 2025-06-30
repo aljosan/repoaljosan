@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Coach, LessonBooking, Member, Court, Booking, PaymentStatus, PaymentMethod } from '../types';
+import { Coach, LessonBooking, Member, Court, Booking, PaymentMethod } from '../types';
 import LessonBookingModal from './LessonBookingModal';
 import PaymentModal from './PaymentModal';
 

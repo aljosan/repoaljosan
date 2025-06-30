@@ -6,7 +6,7 @@ interface AnnouncementsViewProps {
     announcements: Announcement[];
     members: Member[];
     onAddAnnouncement: (authorId: string, title: string, content: string) => void;
-    currentUser: Member;
+    currentUser: Member | null;
     adminId: string;
 }
 

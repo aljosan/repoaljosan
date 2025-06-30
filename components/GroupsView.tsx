@@ -11,7 +11,7 @@ interface GroupsViewProps {
     messages: GroupMessage[];
     onSendMessage: (groupId: string, authorId: string, textContent: string) => void;
     allMembers: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     coaches: Coach[];
     adminId: string;
     onCreateGroup: (data: { name: string, description: string, coachId?: string }) => void;

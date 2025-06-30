@@ -7,7 +7,7 @@ import { ICONS } from '../constants';
 interface EventCardProps {
   event: Event;
   allMembers: Member[];
-  currentUser: Member;
+  currentUser: Member | null;
   onUpdateAvailability: (eventId: string, memberId: string, status: AvailabilityStatus) => void;
 }
 

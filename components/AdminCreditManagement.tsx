@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useMembers, useTransactions } from '../hooks/ClubDataContext';
-import { Member, Transaction } from '../types';
 
 const AdminCreditManagement: React.FC = () => {
     const { members } = useMembers();

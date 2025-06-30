@@ -5,7 +5,7 @@ import PartnerRequestCard from './PartnerRequestCard';
 interface FindPartnerViewProps {
     requests: PartnerRequest[];
     members: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     onAddRequest: (req: Omit<PartnerRequest, 'id' | 'status' | 'timestamp'>) => void;
     onCloseRequest: (requestId: string) => void;
 }
@@ -19,6 +19,7 @@ const FindPartnerView: React.FC<FindPartnerViewProps> = ({ requests, members, cu
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!currentUser) return;
         onAddRequest({
             memberId: currentUser.id,
             date: new Date(date),

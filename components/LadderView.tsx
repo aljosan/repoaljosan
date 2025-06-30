@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LadderPlayer, Member, Challenge, ChallengeStatus } from '../types';
+import { LadderPlayer, Member, Challenge } from '../types';
 import LadderRankingList from './LadderRankingList';
 import ChallengesSection from './ChallengesSection';
 import ReportScoreModal from './ReportScoreModal';
@@ -8,7 +8,7 @@ interface LadderViewProps {
     ladderPlayers: LadderPlayer[];
     allMembers: Member[];
     challenges: Challenge[];
-    currentUser: Member;
+    currentUser: Member | null;
     onIssueChallenge: (challengerId: string, challengedId: string) => void;
     onRespondToChallenge: (challengeId: string, response: 'accept' | 'decline') => void;
     onReportResult: (challengeId: string, winnerId: string, score: string) => void;
@@ -22,7 +22,9 @@ const LadderView: React.FC<LadderViewProps> = (props) => {
     
     const { currentUser, challenges } = props;
 
-    const myChallenges = challenges.filter(c => c.challengerId === currentUser.id || c.challengedId === currentUser.id);
+    const myChallenges = currentUser ?
+        challenges.filter(c => c.challengerId === currentUser.id || c.challengedId === currentUser.id)
+        : [];
 
     const handleReportScore = (challengeId: string, winnerId: string, score: string) => {
         props.onReportResult(challengeId, winnerId, score);

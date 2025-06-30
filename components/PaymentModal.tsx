@@ -7,7 +7,7 @@ interface PaymentModalProps {
         name: string;
         price: number;
     };
-    currentUser: Member;
+    currentUser: Member | null;
     onConfirm: (method: PaymentMethod) => void;
     onClose: () => void;
 }
@@ -19,7 +19,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ item, currentUser, onConfir
         return new Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK' }).format(amount);
     };
 
-    const canAffordWithCredits = currentUser.clubCredits >= item.price;
+    const canAffordWithCredits = (currentUser?.clubCredits || 0) >= item.price;
 
     const handleConfirm = () => {
         if (!selectedMethod) return;
@@ -61,7 +61,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ item, currentUser, onConfir
                         <PaymentOption
                             method="Credits"
                             title="Pay with Club Credits"
-                            description={`Available: ${currentUser.clubCredits} credits`}
+                            description={`Available: ${currentUser?.clubCredits ?? 0} credits`}
                             selectedMethod={selectedMethod}
                             onSelect={setSelectedMethod}
                             disabled={!canAffordWithCredits}
