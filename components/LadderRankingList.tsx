@@ -5,13 +5,13 @@ import MemberAvatar from './MemberAvatar';
 interface LadderRankingListProps {
     ladderPlayers: LadderPlayer[];
     allMembers: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     onIssueChallenge: (challengerId: string, challengedId: string) => void;
 }
 
 const LadderRankingList: React.FC<LadderRankingListProps> = ({ ladderPlayers, allMembers, currentUser, onIssueChallenge }) => {
     
-    const currentUserRank = ladderPlayers.find(p => p.memberId === currentUser.id)?.rank;
+    const currentUserRank = currentUser ? ladderPlayers.find(p => p.memberId === currentUser.id)?.rank : undefined;
 
     return (
         <div className="overflow-x-auto">
@@ -31,7 +31,7 @@ const LadderRankingList: React.FC<LadderRankingListProps> = ({ ladderPlayers, al
                         const member = allMembers.find(m => m.id === player.memberId);
                         if (!member) return null;
 
-                        const isCurrentUser = player.memberId === currentUser.id;
+                        const isCurrentUser = currentUser ? player.memberId === currentUser.id : false;
                         const canChallenge = currentUserRank && player.rank < currentUserRank && player.rank >= currentUserRank - 5;
 
                         return (
@@ -49,7 +49,7 @@ const LadderRankingList: React.FC<LadderRankingListProps> = ({ ladderPlayers, al
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     {canChallenge && (
                                         <button
-                                            onClick={() => onIssueChallenge(currentUser.id, player.memberId)}
+                                            onClick={() => currentUser && onIssueChallenge(currentUser.id, player.memberId)}
                                             className="px-4 py-1.5 bg-club-primary text-white text-xs font-semibold rounded-full hover:bg-club-primary-dark transition-colors"
                                         >
                                             Challenge

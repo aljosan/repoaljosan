@@ -58,12 +58,12 @@ const GroupsView: React.FC<GroupsViewProps> = (props) => {
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [isManaging, setIsManaging] = useState(false);
 
-    const isAdmin = currentUser.id === adminId;
+    const isAdmin = currentUser ? currentUser.id === adminId : false;
 
     // Admins can see all groups. Regular users only see groups they are in (as member or coach).
     const userGroups = isAdmin
       ? groups
-      : groups.filter(g => (g.memberIds.includes(currentUser.id) || g.coachId === currentUser.id));
+      : groups.filter(g => currentUser ? (g.memberIds.includes(currentUser.id) || g.coachId === currentUser.id) : false);
 
     if (selectedGroup) {
         const groupMessages = messages.filter(m => m.groupId === selectedGroup.id);
