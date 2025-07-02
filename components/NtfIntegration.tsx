@@ -1,14 +1,10 @@
 import React from 'react';
-import { useClubData } from '../hooks/useClubData';
+import { useClubDataContext } from '../hooks/ClubDataContext';
 import { Member } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 
-interface NtfIntegrationProps {
-    clubData: ReturnType<typeof useClubData>;
-}
-
-const NtfIntegration: React.FC<NtfIntegrationProps> = ({ clubData }) => {
-    const { ntfSyncStatus, syncWithNtf } = clubData;
+const NtfIntegration: React.FC = () => {
+    const { ntfSyncStatus, syncWithNtf } = useClubDataContext();
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [syncResult, setSyncResult] = React.useState<{ synced: Member[], skipped: Member[] } | null>(null);
 

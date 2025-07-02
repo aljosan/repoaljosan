@@ -32,7 +32,7 @@ function getChatInstance(): Chat {
 
 export const getCoachResponseStream = async (
     prompt: string,
-    history: ChatMessage[]
+    _history: ChatMessage[]
 ): Promise<AsyncGenerator<GenerateContentResponse>> => {
     const chatInstance = getChatInstance();
     

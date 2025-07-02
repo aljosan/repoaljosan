@@ -5,7 +5,7 @@ import MemberAvatar from './MemberAvatar';
 interface PartnerRequestCardProps {
     request: PartnerRequest;
     author: Member;
-    currentUser: Member;
+    currentUser: Member | null;
     onCloseRequest: (requestId: string) => void;
 }
 
@@ -16,7 +16,7 @@ const PartnerRequestCard: React.FC<PartnerRequestCardProps> = ({ request, author
         onCloseRequest(request.id);
     };
     
-    const isOwnRequest = author.id === currentUser.id;
+    const isOwnRequest = currentUser ? author.id === currentUser.id : false;
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-5 flex flex-col justify-between border-l-4 border-club-primary">

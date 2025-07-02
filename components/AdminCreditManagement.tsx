@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { useClubData } from '../hooks/useClubData';
-import { Member, Transaction } from '../types';
+import { useMembers, useTransactions } from '../hooks/ClubDataContext';
 
-interface AdminCreditManagementProps {
-    clubData: ReturnType<typeof useClubData>;
-}
-
-const AdminCreditManagement: React.FC<AdminCreditManagementProps> = ({ clubData }) => {
-    const { members, transactions, awardCredits } = clubData;
+const AdminCreditManagement: React.FC = () => {
+    const { members } = useMembers();
+    const { transactions, awardCredits } = useTransactions();
     const [selectedMemberId, setSelectedMemberId] = useState('');
     const [amount, setAmount] = useState('');
     const [reason, setReason] = useState('');

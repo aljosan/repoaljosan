@@ -6,7 +6,7 @@ interface AnnouncementsViewProps {
     announcements: Announcement[];
     members: Member[];
     onAddAnnouncement: (authorId: string, title: string, content: string) => void;
-    currentUser: Member;
+    currentUser: Member | null;
     adminId: string;
 }
 
@@ -46,9 +46,10 @@ const CreateAnnouncementForm: React.FC<{ onAdd: (title: string, content: string)
 };
 
 const AnnouncementsView: React.FC<AnnouncementsViewProps> = ({ announcements, members, onAddAnnouncement, currentUser, adminId }) => {
-    const isAdmin = currentUser.id === adminId;
+    const isAdmin = currentUser ? currentUser.id === adminId : false;
 
     const handleAddAnnouncement = (title: string, content: string) => {
+        if (!currentUser) return;
         onAddAnnouncement(currentUser.id, title, content);
     };
     

@@ -64,7 +64,7 @@ const AdminGroupsManagement: React.FC<AdminGroupsManagementProps> = ({
         e.preventDefault();
     };
     
-    const handleDragEnter = (e: React.DragEvent, targetId: string | null) => {
+    const handleDragEnter = (_e: React.DragEvent, targetId: string | null) => {
         setDragOverTarget(targetId);
     };
 

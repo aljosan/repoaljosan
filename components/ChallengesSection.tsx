@@ -4,31 +4,31 @@ import ChallengeCard from './ChallengeCard';
 
 interface ChallengesSectionProps {
     challenges: Challenge[];
-    currentUser: Member;
+    currentUser: Member | null;
     allMembers: Member[];
     onRespond: (challengeId: string, response: 'accept' | 'decline') => void;
     onReportClick: (challenge: Challenge) => void;
 }
 
 const ChallengesSection: React.FC<ChallengesSectionProps> = (props) => {
-    const { challenges, currentUser } = props;
+    const { challenges, currentUser, ...rest } = props;
 
-    const incoming = challenges.filter(c => c.challengedId === currentUser.id && c.status === ChallengeStatus.PENDING);
-    const outgoing = challenges.filter(c => c.challengerId === currentUser.id && c.status === ChallengeStatus.PENDING);
-    const active = challenges.filter(c => c.status === ChallengeStatus.ACCEPTED && (c.challengerId === currentUser.id || c.challengedId === currentUser.id));
+    const incoming = currentUser ? challenges.filter(c => c.challengedId === currentUser.id && c.status === ChallengeStatus.PENDING) : [];
+    const outgoing = currentUser ? challenges.filter(c => c.challengerId === currentUser.id && c.status === ChallengeStatus.PENDING) : [];
+    const active = currentUser ? challenges.filter(c => c.status === ChallengeStatus.ACCEPTED && (c.challengerId === currentUser.id || c.challengedId === currentUser.id)) : [];
     const completed = challenges.filter(c => c.status === ChallengeStatus.COMPLETED || c.status === ChallengeStatus.DECLINED);
 
     return (
         <div className="space-y-8">
             { (incoming.length > 0 || outgoing.length > 0 || active.length > 0) ? (
               <>
-                <ChallengeCategory title="Incoming Challenges" challenges={incoming} {...props} />
-                <ChallengeCategory title="Outgoing Challenges" challenges={outgoing} {...props} />
-                <ChallengeCategory title="Active Matches" challenges={active} {...props} />
+                <ChallengeCategory title="Incoming Challenges" challenges={incoming} currentUser={currentUser} {...rest} />
+                <ChallengeCategory title="Outgoing Challenges" challenges={outgoing} currentUser={currentUser} {...rest} />
+                <ChallengeCategory title="Active Matches" challenges={active} currentUser={currentUser} {...rest} />
               </>
             ) : <p className="text-center text-slate-500">You have no pending or active challenges. Go to the rankings and challenge someone!</p> }
             
-            <ChallengeCategory title="Completed Matches" challenges={completed} {...props} isCompleted/>
+            <ChallengeCategory title="Completed Matches" challenges={completed} currentUser={currentUser} {...rest} isCompleted/>
 
         </div>
     );

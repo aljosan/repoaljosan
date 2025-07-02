@@ -8,7 +8,7 @@ interface CourtBookingProps {
     bookings: Booking[];
     lessonBookings: LessonBooking[];
     members: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     onBookCourt: (courtId: string, memberId: string, startTime: Date) => Booking | null;
     onPayForBooking: (bookingId: string, method: PaymentMethod) => boolean;
 }
@@ -18,7 +18,7 @@ const TimeSlotGrid: React.FC<{
     bookings: Booking[];
     lessonBookings: LessonBooking[];
     members: Member[];
-    currentUser: Member;
+    currentUser: Member | null;
     selectedDate: Date;
     onSlotClick: (court: Court, time: number) => void;
     onPayClick: (booking: Booking) => void;
@@ -50,7 +50,7 @@ const TimeSlotGrid: React.FC<{
 
                             if (booking) {
                                 const member = members.find(m => m.id === booking.memberId);
-                                const isCurrentUserBooking = booking.memberId === currentUser.id;
+                                const isCurrentUserBooking = currentUser ? booking.memberId === currentUser.id : false;
 
                                 if (isCurrentUserBooking && booking.paymentStatus === PaymentStatus.UNPAID) {
                                      return (
@@ -126,7 +126,8 @@ const CourtBooking: React.FC<CourtBookingProps> = ({ courts, bookings, lessonBoo
         const startTime = new Date(selectedDate);
         startTime.setHours(time, 0, 0, 0);
         
-        const newBooking = onBookCourt(court.id, currentUser.id, startTime);
+        if (!currentUser) return;
+        const newBooking = onBookCourt(court.id, currentUser!.id, startTime);
         if (newBooking) {
             setBookingForPayment(newBooking);
         }

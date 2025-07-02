@@ -1,6 +1,6 @@
 {
   "name": "Copy of KTK Connect",
-  "description": "The official app for Kristiansand Tennisklubb (KTK) to manage events, book courts, participate in surveys, and get AI-powered coaching tips.",
+  "description": "The official app for Kristiansand Tennisklubb (KTK) to manage events, book courts, participate in surveys, and get AI-powered coaching tips. Includes local data persistence and member login.",
   "requestFramePermissions": [],
   "prompt": ""
 }

@@ -8,7 +8,7 @@ interface LessonsViewProps {
     lessonBookings: LessonBooking[];
     addLessonBooking: (coachId: string, memberId: string, startTime: Date) => LessonBooking | null;
     onPayForLessonBooking: (lessonId: string, method: PaymentMethod) => boolean;
-    currentUser: Member;
+    currentUser: Member | null;
     courts: Court[];
     regularBookings: Booking[];
     members: Member[];

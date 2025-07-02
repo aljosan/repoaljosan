@@ -15,13 +15,14 @@ import FindPartnerView from './components/FindPartnerView';
 import AnnouncementsView from './components/AnnouncementsView';
 import MyAccountView from './components/WalletView';
 import LearningCenterView from './components/LearningCenterView';
-import { useClubData } from './hooks/useClubData';
+import { useClubDataContext, useMembers, useBookings, useGroups } from './hooks/ClubDataContext';
 import { View } from './types';
 import SettingsView from './components/SettingsView';
 import PrivacyPolicyView from './components/PrivacyPolicyView';
+import LoginView from './components/LoginView';
 
-const DashboardView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { events, members, currentUser, updateAvailability } = clubData;
+const DashboardView: React.FC = () => {
+    const { events, members, currentUser, updateAvailability } = useClubDataContext();
     const sortedEvents = useMemo(() => [...events].sort((a, b) => a.date.getTime() - b.date.getTime()), [events]);
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -32,8 +33,8 @@ const DashboardView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({
     );
 };
 
-const MembersView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { members } = clubData;
+const MembersView: React.FC = () => {
+    const { members } = useMembers();
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Club Members ({members.length})</h2>
@@ -49,26 +50,26 @@ const MembersView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ c
     );
 };
 
-const CourtBookingView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { courts, bookings, members, currentUser, addBooking, lessonBookings, payForBooking } = clubData;
+const CourtBookingView: React.FC = () => {
+    const { courts, bookings, lessonBookings, addBooking, payForBooking } = useBookings();
+    const { members, currentUser } = useMembers();
     return <CourtBooking courts={courts} bookings={bookings} lessonBookings={lessonBookings} members={members} currentUser={currentUser} onBookCourt={addBooking} onPayForBooking={payForBooking} />;
 };
 
-const CommunityPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { posts, members, currentUser, addPost } = clubData;
+const CommunityPageView: React.FC = () => {
+    const { posts, members, currentUser, addPost } = useClubDataContext();
     return <CommunityView posts={posts} members={members} currentUser={currentUser} onAddPost={addPost} />;
 };
 
-const GroupsPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { 
-        groups, groupMessages, sendGroupMessage, members, currentUser, coaches, 
-        ADMIN_ID, createGroup, updateGroup, deleteGroup, moveMemberToGroup
-    } = clubData;
-    return <GroupsView 
-        groups={groups} 
-        messages={groupMessages} 
-        onSendMessage={sendGroupMessage} 
-        allMembers={members} 
+const GroupsPageView: React.FC = () => {
+    const { groups, groupMessages, sendGroupMessage, coaches, createGroup, updateGroup, deleteGroup, moveMemberToGroup } = useGroups();
+    const { members, currentUser } = useMembers();
+    const { ADMIN_ID } = useClubDataContext();
+    return <GroupsView
+        groups={groups}
+        messages={groupMessages}
+        onSendMessage={sendGroupMessage}
+        allMembers={members}
         currentUser={currentUser}
         coaches={coaches}
         adminId={ADMIN_ID}
@@ -79,30 +80,30 @@ const GroupsPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = (
     />;
 };
 
-const LessonsPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { coaches, lessonBookings, addLessonBooking, currentUser, courts, bookings, members, payForLessonBooking } = clubData;
+const LessonsPageView: React.FC = () => {
+    const { coaches, lessonBookings, addLessonBooking, currentUser, courts, bookings, members, payForLessonBooking } = useClubDataContext();
     return <LessonsView coaches={coaches} lessonBookings={lessonBookings} addLessonBooking={addLessonBooking} currentUser={currentUser} courts={courts} regularBookings={bookings} members={members} onPayForLessonBooking={payForLessonBooking} />;
 };
 
-const LadderPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { ladderPlayers, members, challenges, currentUser, issueChallenge, respondToChallenge, reportMatchResult } = clubData;
+const LadderPageView: React.FC = () => {
+    const { ladderPlayers, members, challenges, currentUser, issueChallenge, respondToChallenge, reportMatchResult } = useClubDataContext();
     return <LadderView ladderPlayers={ladderPlayers} allMembers={members} challenges={challenges} currentUser={currentUser} onIssueChallenge={issueChallenge} onRespondToChallenge={respondToChallenge} onReportResult={reportMatchResult} />;
 };
 
-const FindPartnerPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { partnerRequests, members, currentUser, addPartnerRequest, closePartnerRequest } = clubData;
-    return <FindPartnerView 
-        requests={partnerRequests} 
-        members={members} 
-        currentUser={currentUser} 
-        onAddRequest={addPartnerRequest} 
-        onCloseRequest={closePartnerRequest} 
+const FindPartnerPageView: React.FC = () => {
+    const { partnerRequests, members, currentUser, addPartnerRequest, closePartnerRequest } = useClubDataContext();
+    return <FindPartnerView
+        requests={partnerRequests}
+        members={members}
+        currentUser={currentUser}
+        onAddRequest={addPartnerRequest}
+        onCloseRequest={closePartnerRequest}
     />;
 };
 
-const AnnouncementsPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { announcements, members, addAnnouncement, currentUser, ADMIN_ID } = clubData;
-    return <AnnouncementsView 
+const AnnouncementsPageView: React.FC = () => {
+    const { announcements, members, addAnnouncement, currentUser, ADMIN_ID } = useClubDataContext();
+    return <AnnouncementsView
         announcements={announcements}
         members={members}
         onAddAnnouncement={addAnnouncement}
@@ -115,21 +116,21 @@ const AICoachView: React.FC = () => {
     return <AICoach />;
 };
 
-const SurveysPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    return <SurveysView clubData={clubData} />;
+const SurveysPageView: React.FC = () => {
+    return <SurveysView />;
 };
 
-const MyAccountPageView: React.FC<{ clubData: ReturnType<typeof useClubData>, setCurrentView: (view: View) => void }> = ({ clubData, setCurrentView }) => {
-    return <MyAccountView clubData={clubData} setCurrentView={setCurrentView} />;
+const MyAccountPageView: React.FC<{ setCurrentView: (view: View) => void }> = ({ setCurrentView }) => {
+    return <MyAccountView setCurrentView={setCurrentView} />;
 };
 
-const LearningCenterPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    const { learningArticles } = clubData;
+const LearningCenterPageView: React.FC = () => {
+    const { learningArticles } = useClubDataContext();
     return <LearningCenterView articles={learningArticles} />;
 };
 
-const SettingsPageView: React.FC<{ clubData: ReturnType<typeof useClubData> }> = ({ clubData }) => {
-    return <SettingsView clubData={clubData} />;
+const SettingsPageView: React.FC = () => {
+    return <SettingsView />;
 };
 
 const PrivacyPolicyPageView: React.FC = () => {
@@ -139,66 +140,60 @@ const PrivacyPolicyPageView: React.FC = () => {
 
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
-    const clubData = useClubData();
-    const { currentUser, notifications, markNotificationsAsRead, ADMIN_ID } = clubData;
+    const { currentUser, notifications, markNotificationsAsRead, ADMIN_ID } = useClubDataContext();
+    const { logout } = useMembers();
 
     const renderView = () => {
         switch (currentView) {
             case View.DASHBOARD:
-                return <DashboardView clubData={clubData} />;
+                return <DashboardView />;
             case View.MEMBERS:
-                return <MembersView clubData={clubData} />;
+                return <MembersView />;
             case View.BOOKING:
-                return <CourtBookingView clubData={clubData} />;
+                return <CourtBookingView />;
             case View.AI_COACH:
                 return <AICoachView />;
             case View.COMMUNITY:
-                return <CommunityPageView clubData={clubData} />;
+                return <CommunityPageView />;
             case View.SURVEYS:
-                return <SurveysPageView clubData={clubData} />;
+                return <SurveysPageView />;
             case View.LESSONS:
-                return <LessonsPageView clubData={clubData} />;
+                return <LessonsPageView />;
             case View.GROUPS:
-                return <GroupsPageView clubData={clubData} />;
+                return <GroupsPageView />;
             case View.LADDER:
-                return <LadderPageView clubData={clubData} />;
+                return <LadderPageView />;
             case View.FIND_PARTNER:
-                return <FindPartnerPageView clubData={clubData} />;
+                return <FindPartnerPageView />;
             case View.ANNOUNCEMENTS:
-                return <AnnouncementsPageView clubData={clubData} />;
+                return <AnnouncementsPageView />;
             case View.MY_ACCOUNT:
-                return <MyAccountPageView clubData={clubData} setCurrentView={setCurrentView} />;
+                return <MyAccountPageView setCurrentView={setCurrentView} />;
             case View.LEARNING_CENTER:
-                return <LearningCenterPageView clubData={clubData} />;
+                return <LearningCenterPageView />;
             case View.SETTINGS:
-                return <SettingsPageView clubData={clubData} />;
+                return <SettingsPageView />;
             case View.PRIVACY_POLICY:
                 return <PrivacyPolicyPageView />;
             default:
-                return <DashboardView clubData={clubData} />;
+                return <DashboardView />;
         }
     };
     
     if (!currentUser) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-100">
-                <div className="text-center p-8 bg-white rounded-lg shadow-lg">
-                    <h1 className="text-2xl font-bold text-slate-800">No User Found</h1>
-                    <p className="text-slate-600 mt-2">Could not load user data, or the last user was deleted. The app cannot continue.</p>
-                </div>
-            </div>
-        )
+        return <LoginView />;
     }
 
     return (
         <div className="min-h-screen bg-slate-100 font-sans">
-            <Header 
+            <Header
                 currentView={currentView}
                 setCurrentView={setCurrentView}
                 notifications={notifications}
                 onMarkNotificationsAsRead={markNotificationsAsRead}
                 currentUser={currentUser}
                 adminId={ADMIN_ID}
+                onLogout={logout}
             />
             <main className="max-w-7xl mx-auto py-8 px-2 sm:px-6 lg:px-8">
                 {renderView()}

@@ -25,6 +25,7 @@
 
     "paths": {
       "@/*" :  ["./*"]
-    }
+    },
+    "types": ["react", "react-dom"]
   }
 }
