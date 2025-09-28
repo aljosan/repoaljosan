@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { useClub } from '../../context/ClubContext';
-import { Booking, RecurringBookingRule } from '../../types';
-import { ALL_COURTS } from '../../constants';
-import Icon from '../ui/Icon';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
+import { useClub } from '@/context/ClubContext';
+import { Booking, RecurringBookingRule } from '@/types';
+import { ALL_COURTS } from '@/constants';
 
 interface EditSessionModalProps {
   isOpen: boolean;

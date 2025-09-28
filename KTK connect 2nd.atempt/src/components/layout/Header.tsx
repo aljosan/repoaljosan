@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { useClub } from '../../context/ClubContext';
-import { AppView, UserRole } from '../../types';
-import Icon from '../ui/Icon';
-import NotificationDropdown from './NotificationDropdown';
-import { CLUB_NAME } from '../../constants';
-import { Avatar } from '../ui/Avatar';
+import { useClub } from '@/context/ClubContext';
+import { AppView, UserRole } from '@/types';
+import Icon from '@/components/ui/Icon';
+import NotificationDropdown from '@/components/layout/NotificationDropdown';
+import { CLUB_NAME } from '@/constants';
+import { Avatar } from '@/components/ui/Avatar';
 
 interface HeaderProps {
   activeView: AppView;

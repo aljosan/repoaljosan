@@ -1,20 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, closestCenter, PointerSensor, useSensor, useSensors, TouchSensor } from '@dnd-kit/core';
-import { useClub } from '../../context/ClubContext';
-import { UserRole, Booking, Group, User, ConflictCheckResult } from '../../types';
+import { useClub } from '@/context/ClubContext';
+import { UserRole, Booking, ConflictCheckResult, User } from '@/types';
 import GroupSidebar from '../planner/GroupSidebar';
 import PlannerGrid from '../planner/PlannerGrid';
-import Icon from '../ui/Icon';
-import CreateSessionModal from '../planner/CreateSessionModal';
+import Icon from '@/components/ui/Icon';
+import CreateSessionModal from '@/components/planner/CreateSessionModal';
 import EditSessionModal from '../planner/EditSessionModal';
 import EditRecurrenceModal from '../planner/EditRecurrenceModal';
-import TemplateModal from '../planner/TemplateModal';
-import BlockSlotModal from '../planner/BlockSlotModal';
+import TemplateModal from '@/components/planner/TemplateModal';
+import BlockSlotModal from '@/components/planner/BlockSlotModal';
 import PlannerFilters from '../planner/PlannerFilters';
-import PlannerWeekGrid from '../planner/PlannerWeekGrid';
-import { ALL_COURTS, BOOKING_END_HOUR, BOOKING_START_HOUR } from '../../constants';
+import PlannerWeekGrid from '@/components/planner/PlannerWeekGrid';
+import { ALL_COURTS, BOOKING_END_HOUR, BOOKING_START_HOUR } from '@/constants';
 import BulkActionsToolbar from '../planner/BulkActionsToolbar';
-import { printSchedule } from '../../utils/print';
+import { printSchedule } from '@/src/utils/print';
 import AnalyticsModal from '../planner/AnalyticsModal';
 
 
@@ -36,7 +36,7 @@ const Planner: React.FC = () => {
     } = useClub();
     
     const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate] = useState(new Date());
     const [filters, setFilters] = useState<{ courtType: 'All' | 'Indoor' | 'Outdoor', coachId: string | 'All', groupId: string | 'All' }>({ courtType: 'All', coachId: 'All', groupId: 'All' });
     
     const [createSessionInfo, setCreateSessionInfo] = useState<CreateSessionInfo | null>(null);
