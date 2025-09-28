@@ -9,7 +9,7 @@ import {
   RecurringBookingRule,
   ScheduleTemplate,
   BlockedSlot,
-} from '../types';
+} from '@/types';
 
 const now = new Date();
 const startOfWeek = new Date(now);
