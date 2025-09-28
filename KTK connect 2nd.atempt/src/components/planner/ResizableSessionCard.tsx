@@ -1,11 +1,11 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Booking } from '../../types';
-import { useClub } from '../../context/ClubContext';
-import Icon from '../ui/Icon';
-import { getGroupColorHex } from '../../utils/color';
-import LinkifiedText from '../ui/LinkifiedText';
+import { Booking } from '@/types';
+import { useClub } from '@/context/ClubContext';
+import Icon from '@/components/ui/Icon';
+import { getGroupColorHex } from '@/utils/color';
+import LinkifiedText from '@/components/ui/LinkifiedText';
 
 interface ResizableSessionCardProps {
   booking: Booking;
@@ -59,7 +59,6 @@ const ResizableSessionCard: React.FC<ResizableSessionCardProps> = ({ booking, po
       onClick={onSelect}
       onDoubleClick={onDoubleClick}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
       aria-label={ariaLabel}
       {...attributes}
       {...listeners}

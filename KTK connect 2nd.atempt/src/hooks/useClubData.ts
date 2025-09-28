@@ -1,8 +1,8 @@
 
 import { useState, useMemo } from 'react';
-import { User, ClubEvent, Group, Booking, Notification, UserRole, GroupMessage, RecurringBookingRule, ScheduleTemplate, BlockedSlot, ConflictCheckResult } from '../types';
+import { User, ClubEvent, Group, Booking, Notification, UserRole, RecurringBookingRule, ScheduleTemplate, BlockedSlot, ConflictCheckResult } from '@/types';
 import { mockUsers, mockEvents, mockGroups, mockBookings, mockNotifications, mockRecurringBookings as mockRecurringBookingRules, mockScheduleTemplates, mockBlockedSlots } from '@/data/mockData';
-import { INDOOR_COURTS } from '../constants';
+import { INDOOR_COURTS } from '@/constants';
 
 export interface UseClubDataReturnType {
   currentUser: User;

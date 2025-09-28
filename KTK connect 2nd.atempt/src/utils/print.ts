@@ -1,4 +1,4 @@
-import { Booking, BlockedSlot, Group, User } from '../types';
+import { Booking, BlockedSlot, Group, User } from '@/types';
 
 const generateScheduleHTML = (
     bookings: Booking[], 
@@ -107,10 +107,10 @@ const generateScheduleHTML = (
 };
 
 export const printSchedule = (
-    bookings: Booking[], 
+    bookings: Booking[],
     blockedSlots: BlockedSlot[],
     groups: Group[],
-    users: User[],
+    _users: User[],
     startDate: Date,
     endDate: Date
 ) => {

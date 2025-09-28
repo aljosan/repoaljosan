@@ -1,7 +1,7 @@
 import React from 'react';
-import { Group, User } from '../../types';
-import Button from '../ui/Button';
-import Icon from '../ui/Icon';
+import { Group, User } from '@/types';
+import Button from '@/components/ui/Button';
+import Icon from '@/components/ui/Icon';
 
 interface PlannerFiltersProps {
     filters: {

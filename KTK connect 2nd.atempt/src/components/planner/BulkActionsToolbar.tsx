@@ -1,6 +1,6 @@
 import React from 'react';
-import Button from '../ui/Button';
-import Icon from '../ui/Icon';
+import Button from '@/components/ui/Button';
+import Icon from '@/components/ui/Icon';
 
 interface BulkActionsToolbarProps {
   selectedCount: number;

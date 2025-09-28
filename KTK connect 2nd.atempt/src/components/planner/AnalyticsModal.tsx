@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Booking, Group, User, UserRole } from '../../types';
-import { ALL_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '../../constants';
-import Icon from '../ui/Icon';
-import { printAnalytics } from '../../utils/print';
-import { exportToCSV } from '../../utils/csv';
+import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
+import { Booking, Group, User, UserRole } from '@/types';
+import { ALL_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '@/constants';
+import Icon from '@/components/ui/Icon';
+import { printAnalytics } from '@/src/utils/print';
+import { exportToCSV } from '@/src/utils/csv';
 
 interface AnalyticsModalProps {
   isOpen: boolean;

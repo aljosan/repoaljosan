@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { useClub } from '../../context/ClubContext';
-import DraggableGroupCard from './DraggableGroupCard';
-import Icon from '../ui/Icon';
-import { Group } from '../../types';
+import { useClub } from '@/context/ClubContext';
+import DraggableGroupCard from '@/components/planner/DraggableGroupCard';
+import Icon from '@/components/ui/Icon';
+import { Group } from '@/types';
 
 interface GroupSidebarProps {
     selectedDate: Date;

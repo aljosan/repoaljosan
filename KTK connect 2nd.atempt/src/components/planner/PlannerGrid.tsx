@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { ALL_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '../../constants';
-import { Booking, BlockedSlot, ConflictCheckResult } from '../../types';
-import Icon from '../ui/Icon';
+import { ALL_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '@/constants';
+import { Booking, BlockedSlot, ConflictCheckResult } from '@/types';
+import Icon from '@/components/ui/Icon';
 import ResizableSessionCard from './ResizableSessionCard';
 
 interface PlannerGridProps {
