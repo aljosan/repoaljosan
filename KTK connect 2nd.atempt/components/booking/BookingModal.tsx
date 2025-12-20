@@ -19,19 +19,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, slot, onCo
   const { currentUser } = useClub();
   const [step, setStep] = useState<ModalStep>('confirm');
   const [errorMessage, setErrorMessage] = useState('');
+  const [durationMinutes, setDurationMinutes] = useState(60);
   
   // Reset step when modal is reopened for a new slot
   useEffect(() => {
     if (isOpen) {
         setStep('confirm');
         setErrorMessage('');
+        setDurationMinutes(60);
     }
   }, [isOpen, slot]);
 
   const { courtId, startTime } = slot;
   const courtType: 'Indoor' | 'Outdoor' = INDOOR_COURTS.includes(courtId) ? 'Indoor' : 'Outdoor';
-  const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
-  const cost = BOOKING_COST_PER_HOUR;
+  const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
+  const cost = BOOKING_COST_PER_HOUR * (durationMinutes / 60);
   const hasEnoughCredits = currentUser.credits >= cost;
   
   const handlePayment = (method: 'credits' | 'card') => {
@@ -55,6 +57,26 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, slot, onCo
               <p><strong>Court:</strong> {courtId} ({courtType})</p>
               <p><strong>Date:</strong> {startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               <p><strong>Time:</strong> {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <p><strong>Duration:</strong> {durationMinutes} minutes</p>
+            </div>
+            <div className="space-y-2">
+              <p className="font-semibold text-sm text-gray-600">Select duration</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[60, 90, 120].map(minutes => (
+                  <button
+                    key={minutes}
+                    type="button"
+                    onClick={() => setDurationMinutes(minutes)}
+                    className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+                      durationMinutes === minutes
+                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-primary-300 hover:text-primary-600'
+                    }`}
+                  >
+                    {minutes} min
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex justify-between items-center bg-blue-50 p-3 rounded-lg border border-blue-200">
                 <span className="font-semibold text-lg text-blue-800">Cost: {cost} Credits</span>
