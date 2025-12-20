@@ -58,6 +58,15 @@ const GroupsView: React.FC<GroupsViewProps> = (props) => {
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [isManaging, setIsManaging] = useState(false);
 
+    // When a group is deleted we need to clear any chat that was showing
+    // that group's conversation so the list refreshes properly
+    const handleDeleteGroup = (id: string) => {
+        if (selectedGroup?.id === id) {
+            setSelectedGroup(null);
+        }
+        onDeleteGroup(id);
+    };
+
     const isAdmin = currentUser.id === adminId;
 
     // Admins can see all groups. Regular users only see groups they are in (as member or coach).
@@ -91,7 +100,7 @@ const GroupsView: React.FC<GroupsViewProps> = (props) => {
                 onGoBack={() => setIsManaging(false)}
                 onCreateGroup={onCreateGroup}
                 onUpdateGroup={onUpdateGroup}
-                onDeleteGroup={onDeleteGroup}
+                onDeleteGroup={handleDeleteGroup}
                 onMoveMember={onMoveMember}
             />
         );
