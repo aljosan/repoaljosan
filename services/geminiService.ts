@@ -1,15 +1,15 @@
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { ChatMessage } from '../types';
 
-const API_KEY = process.env.API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!API_KEY) {
+if (!GEMINI_API_KEY) {
   // In a real app, you might have better error handling or a fallback.
   // For this example, we'll throw an error to make it clear the key is missing.
-  throw new Error("API_KEY environment variable not set.");
+  throw new Error("GEMINI_API_KEY environment variable not set.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const systemInstruction = "You are an expert tennis coach for Kristiansand Tennisklubb (KTK). Provide clear, encouraging, and actionable advice on tennis techniques, strategy, fitness, and drills. Keep your answers concise, friendly, and easy to understand for amateur to intermediate players. Structure your advice with bullet points or short paragraphs for readability. Never mention that you are an AI or a language model.";
 
