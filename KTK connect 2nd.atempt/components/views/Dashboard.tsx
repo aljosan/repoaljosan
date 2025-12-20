@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
       <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-6">Dashboard</h1>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {events.length > 0 ? (
-          events.sort((a,b) => a.startTime.getTime() - b.startTime.getTime()).map(event => (
+          [...events].sort((a,b) => a.startTime.getTime() - b.startTime.getTime()).map(event => (
             <EventCard key={event.id} event={event} />
           ))
         ) : (
