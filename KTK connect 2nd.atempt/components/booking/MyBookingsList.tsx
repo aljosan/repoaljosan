@@ -24,6 +24,13 @@ const MyBookingsList: React.FC = () => {
         }
     };
 
+    const handleRecurringCancel = (scope: 'single' | 'series') => {
+        if (bookingToCancel) {
+            cancelBooking(bookingToCancel.id, { scope });
+            setBookingToCancel(null);
+        }
+    };
+
     if (myUpcomingBookings.length === 0) {
         return (
             <div className="text-center py-16 bg-white rounded-lg shadow-md">
@@ -58,12 +65,32 @@ const MyBookingsList: React.FC = () => {
                 ))}
             </ul>
              {bookingToCancel && (
-                <Modal isOpen={!!bookingToCancel} onClose={() => setBookingToCancel(null)} title="Confirm Cancellation">
-                    <p className="text-gray-700">Are you sure you want to cancel your booking for <strong>Court {bookingToCancel.courtId}</strong> on {new Date(bookingToCancel.startTime).toLocaleDateString()} at {new Date(bookingToCancel.startTime).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}?</p>
-                    <p className="mt-2 text-sm text-green-600">Your credits ({bookingToCancel.cost}) will be refunded to your account.</p>
-                    <div className="flex justify-end gap-3 pt-4 mt-4">
+                <Modal
+                    isOpen={!!bookingToCancel}
+                    onClose={() => setBookingToCancel(null)}
+                    title={bookingToCancel.recurringRuleId ? 'Cancel Recurring Booking' : 'Confirm Cancellation'}
+                >
+                    <p className="text-gray-700">
+                        Are you sure you want to cancel your booking for <strong>Court {bookingToCancel.courtId}</strong> on{' '}
+                        {new Date(bookingToCancel.startTime).toLocaleDateString()} at{' '}
+                        {new Date(bookingToCancel.startTime).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}?
+                    </p>
+                    {!bookingToCancel.recurringRuleId && (
+                        <p className="mt-2 text-sm text-green-600">Your credits ({bookingToCancel.cost}) will be refunded to your account.</p>
+                    )}
+                    {bookingToCancel.recurringRuleId && (
+                        <p className="mt-2 text-sm text-gray-500">Choose whether to cancel this occurrence or the entire series.</p>
+                    )}
+                    <div className="flex flex-wrap justify-end gap-3 pt-4 mt-4">
                         <Button variant="secondary" onClick={() => setBookingToCancel(null)}>Keep Booking</Button>
-                        <Button variant="danger" onClick={handleConfirmCancel}>Confirm Cancellation</Button>
+                        {bookingToCancel.recurringRuleId ? (
+                            <>
+                                <Button variant="secondary" onClick={() => handleRecurringCancel('single')}>This Occurrence Only</Button>
+                                <Button variant="danger" onClick={() => handleRecurringCancel('series')}>Entire Series</Button>
+                            </>
+                        ) : (
+                            <Button variant="danger" onClick={handleConfirmCancel}>Confirm Cancellation</Button>
+                        )}
                     </div>
                 </Modal>
             )}

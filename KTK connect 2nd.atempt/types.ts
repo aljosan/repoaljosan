@@ -49,6 +49,7 @@ export interface Booking {
   notes?: string;
   recurringRuleId?: string;
   isException?: boolean; // True if this is a modified instance of a recurring booking
+  isCancelled?: boolean; // True if this is a cancellation exception for a recurring booking
 }
 
 export interface RecurringBookingRule {
