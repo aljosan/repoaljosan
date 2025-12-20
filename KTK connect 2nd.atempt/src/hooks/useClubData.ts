@@ -15,7 +15,7 @@ export interface UseClubDataReturnType {
   blockedSlots: BlockedSlot[];
   notifications: Notification[];
   addBooking: (booking: Omit<Booking, 'id' | 'userId'>, paymentMethod: 'credits' | 'card') => { success: boolean, message: string };
-  cancelBooking: (bookingId: string) => void;
+  cancelBooking: (bookingId: string, options?: { scope?: 'single' | 'series' }) => void;
   createGroupBooking: (groupId: string, courtId: number, startTime: Date, endTime: Date, notes?: string) => Booking | null;
   updateBooking: (bookingId: string, updates: Partial<Booking>, editSeries: boolean) => boolean;
   addMessageToGroup: (groupId: string, messageText: string) => void;
@@ -83,7 +83,8 @@ export const useClubData = (): UseClubDataReturnType => {
             currentDate.setDate(currentDate.getDate() + 1);
         }
     });
-    return [...bookings, ...generatedBookings].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    const visibleBookings = bookings.filter(b => !b.isCancelled);
+    return [...visibleBookings, ...generatedBookings].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   }, [bookings, recurringBookingRules]);
 
   const getBookingConflicts = (courtId: number, startTime: Date, endTime: Date, options: { excludeBookingId?: string, groupId?: string }): ConflictCheckResult => {
@@ -172,13 +173,82 @@ export const useClubData = (): UseClubDataReturnType => {
     return { success: true, message: "Booking successful!" };
   };
   
-  const cancelBooking = (bookingId: string) => {
+  const cancelBooking = (bookingId: string, options?: { scope?: 'single' | 'series' }) => {
     const bookingToCancel = allBookings.find(b => b.id === bookingId);
     if (!bookingToCancel) return;
 
-    if (bookingToCancel.recurringRuleId && !bookingToCancel.isException) {
-       setNotifications(prev => [{id: `notif-${Date.now()}`, message: `Cannot cancel a single recurring session. Please edit the series.`, timestamp: new Date(), read: false}, ...prev]);
-       return;
+    const scope = options?.scope;
+
+    if (bookingToCancel.recurringRuleId && !scope) {
+      setNotifications(prev => [{id: `notif-${Date.now()}`, message: `Please choose whether to cancel this occurrence or the entire series.`, timestamp: new Date(), read: false}, ...prev]);
+      return;
+    }
+
+    const refundCredits = (bookingsToRefund: Booking[]) => {
+      const userCreditUpdates: Record<string, number> = {};
+      bookingsToRefund.forEach(booking => {
+        if (booking.userId && booking.cost > 0) {
+          userCreditUpdates[booking.userId] = (userCreditUpdates[booking.userId] || 0) + booking.cost;
+        }
+      });
+
+      if (Object.keys(userCreditUpdates).length > 0) {
+        const newUsers = users.map(u => {
+          if (userCreditUpdates[u.id]) {
+            return { ...u, credits: u.credits + userCreditUpdates[u.id] };
+          }
+          return u;
+        });
+        setUsers(newUsers);
+        const updatedCurrentUser = newUsers.find(u => u.id === currentUser.id);
+        if (updatedCurrentUser) {
+          setCurrentUser(updatedCurrentUser);
+        }
+      }
+    };
+
+    if (bookingToCancel.recurringRuleId && scope === 'series') {
+      const ruleId = bookingToCancel.recurringRuleId;
+      const rule = recurringBookingRules.find(r => r.id === ruleId);
+      const ruleGroup = groups.find(g => g.id === rule?.groupId);
+      const relatedBookings = bookings.filter(b => b.recurringRuleId === ruleId);
+
+      refundCredits(relatedBookings);
+      setBookings(prev => prev.filter(b => b.recurringRuleId !== ruleId));
+      setRecurringBookingRules(prev => prev.filter(r => r.id !== ruleId));
+
+      const seriesMessage = ruleGroup
+        ? `Entire recurring series for "${ruleGroup.name}" was cancelled.`
+        : `Entire recurring series on Court ${bookingToCancel.courtId} was cancelled.`;
+      setNotifications(prev => [{id: `notif-${Date.now()}`, message: seriesMessage, timestamp: new Date(), read: false}, ...prev]);
+      return;
+    }
+
+    if (bookingToCancel.recurringRuleId && scope === 'single') {
+      const occurrenceDate = new Date(bookingToCancel.startTime).toDateString();
+      const ruleGroup = groups.find(g => g.id === bookingToCancel.groupId);
+
+      refundCredits([bookingToCancel]);
+      setBookings(prev => {
+        const remaining = prev.filter(b =>
+          !(b.recurringRuleId === bookingToCancel.recurringRuleId && new Date(b.startTime).toDateString() === occurrenceDate)
+        );
+        const cancellationException: Booking = {
+          ...bookingToCancel,
+          id: `booking-${Date.now()}`,
+          isException: true,
+          isCancelled: true,
+        };
+        return [...remaining, cancellationException];
+      });
+
+      const dateLabel = bookingToCancel.startTime.toLocaleDateString();
+      const timeLabel = bookingToCancel.startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const occurrenceMessage = ruleGroup
+        ? `This occurrence of "${ruleGroup.name}" on ${dateLabel} at ${timeLabel} was cancelled.`
+        : `This occurrence on Court ${bookingToCancel.courtId} on ${dateLabel} at ${timeLabel} was cancelled.`;
+      setNotifications(prev => [{id: `notif-${Date.now()}`, message: occurrenceMessage, timestamp: new Date(), read: false}, ...prev]);
+      return;
     }
 
     if (bookingToCancel.userId && bookingToCancel.cost > 0) {
