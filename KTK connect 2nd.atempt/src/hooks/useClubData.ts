@@ -468,7 +468,11 @@ export const useClubData = (): UseClubDataReturnType => {
   const leaveEvent = (eventId: string) => setEvents(pes => pes.map(e => e.id === eventId ? { ...e, attendees: e.attendees.filter(id => id !== currentUser.id) } : e));
   const markNotificationAsRead = (notificationId: string) => setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
   const addEvent = (eventDetails: Omit<ClubEvent, 'id'|'attendees'>) => setEvents(prev => [{...eventDetails, id:`event-${Date.now()}`, attendees:[]}, ...prev]);
-  const deleteEvent = (eventId: string) => setEvents(prev => prev.filter(event => event.id !== eventId));
+  const deleteEvent = (eventId: string) => {
+    const eventTitle = events.find(event => event.id === eventId)?.title ?? 'Event';
+    setEvents(prev => prev.filter(event => event.id !== eventId));
+    setNotifications(prev => [{id: `notif-${Date.now()}`, message: `"${eventTitle}" was deleted.`, timestamp: new Date(), read: false}, ...prev]);
+  };
   const addGroup = (groupDetails: Pick<Group, 'name'|'description'>) => setGroups(prev => [...prev, {...groupDetails, id: `group-${Date.now()}`, members: [], messages: []}]);
   const updateGroup = (groupId: string, updates: Pick<Group, 'name'|'description'>) => setGroups(prev => prev.map(g => (g.id === groupId ? { ...g, ...updates } : g)));
   const moveUserToGroup = (userId: string, targetGroupId: string | null) => {

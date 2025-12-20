@@ -13,6 +13,7 @@ interface EventCardProps {
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const { users, currentUser, joinEvent, leaveEvent, deleteEvent } = useClub();
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
   
   const eventAttendees: User[] = users.filter(user => event.attendees.includes(user.id));
   const isAttending = event.attendees.includes(currentUser.id);
@@ -49,9 +50,14 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
                 {event.type}
               </span>
               {isAdminOrCoach && (
-                  <button onClick={() => setDeleteModalOpen(true)} className="text-gray-400 hover:text-red-500 transition-colors" aria-label="Delete event">
-                      <Icon name="trash" className="w-5 h-5"/>
+                <>
+                  <button onClick={() => setEditModalOpen(true)} className="text-gray-400 hover:text-primary-600 transition-colors" aria-label="Edit event">
+                    <Icon name="pencil" className="w-5 h-5"/>
                   </button>
+                  <button onClick={() => setDeleteModalOpen(true)} className="text-gray-400 hover:text-red-500 transition-colors" aria-label="Delete event">
+                    <Icon name="trash" className="w-5 h-5"/>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -86,6 +92,17 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
                     <Button variant="danger" onClick={handleDelete}>Delete Event</Button>
                 </div>
             </div>
+        </Modal>
+      )}
+
+      {isAdminOrCoach && (
+        <Modal isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} title="Edit Event">
+          <div className="space-y-4">
+            <p>Editing events is not available yet. Please check back soon.</p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="primary" onClick={() => setEditModalOpen(false)}>Got it</Button>
+            </div>
+          </div>
         </Modal>
       )}
     </>
