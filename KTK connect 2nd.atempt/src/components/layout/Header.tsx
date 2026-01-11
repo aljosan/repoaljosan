@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useClub } from '@/context/ClubContext';
+import { useMembers } from '@/context/ClubContext';
 import { AppView, UserRole } from '@/types';
 import Icon from '@/components/ui/Icon';
 import NotificationDropdown from '@/components/layout/NotificationDropdown';
@@ -41,7 +41,7 @@ const NavLink: React.FC<{
 
 
 const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
-  const { currentUser } = useClub();
+  const { currentUser } = useMembers();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isAdminOrCoach = currentUser.role === UserRole.Admin || currentUser.role === UserRole.Coach;
 

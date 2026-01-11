@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { useClub } from '../../context/ClubContext';
+import { useGroups } from '../../context/ClubContext';
 import { Booking, RecurringBookingRule } from '../../types';
 import { ALL_COURTS } from '../../constants';
 import Icon from '../ui/Icon';
@@ -16,7 +16,7 @@ interface EditSessionModalProps {
 }
 
 const EditSessionModal: React.FC<EditSessionModalProps> = ({ isOpen, onClose, onSave, onDelete, booking, onAddRecurring }) => {
-  const { groups } = useClub();
+  const { groups } = useGroups();
   
   const [groupId, setGroupId] = useState('');
   const [courtId, setCourtId] = useState(1);

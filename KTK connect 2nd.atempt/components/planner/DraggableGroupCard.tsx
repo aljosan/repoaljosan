@@ -2,7 +2,7 @@ import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Group } from '../../types';
-import { useClub } from '../../context/ClubContext';
+import { useMembers } from '../../context/ClubContext';
 import { AvatarGroup } from '../ui/Avatar';
 import { getGroupColorHex } from '../../utils/color';
 
@@ -11,7 +11,7 @@ interface DraggableGroupCardProps {
 }
 
 const DraggableGroupCard: React.FC<DraggableGroupCardProps> = ({ group }) => {
-    const { users } = useClub();
+    const { users } = useMembers();
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: group.id,
         data: {

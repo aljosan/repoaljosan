@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useGroups, useMembers } from '../../context/ClubContext';
 import MembersSidebar from '../groups/admin/MembersSidebar';
 import GroupColumn from '../groups/admin/GroupColumn';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
 import EditGroupModal from '../groups/admin/EditGroupModal';
-import { Group, User } from '../../types';
+import { Group } from '../../types';
 
 const AdminGroupsView: React.FC = () => {
-    const { users, groups, addGroup, updateGroup } = useClub();
+    const { users } = useMembers();
+    const { groups, addGroup, updateGroup } = useGroups();
     const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [editingGroup, setEditingGroup] = useState<Partial<Group> | null>(null);

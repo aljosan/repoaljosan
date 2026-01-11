@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useGroups, useMembers } from '../../context/ClubContext';
 import GroupChat from '../groups/GroupChat';
 import Icon from '../ui/Icon';
 import { Group } from '../../types';
 
 const MemberGroupsView: React.FC = () => {
-  const { groups, currentUser } = useClub();
+  const { groups } = useGroups();
+  const { currentUser } = useMembers();
   const myGroups = groups.filter(g => g.members.includes(currentUser.id));
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(myGroups.length > 0 ? myGroups[0] : null);
 

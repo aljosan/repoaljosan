@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ClubEvent, User, UserRole } from '../../types';
-import { useClub } from '../../context/ClubContext';
+import { useEvents, useMembers } from '../../context/ClubContext';
 import { AvatarGroup } from '../ui/Avatar';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
@@ -11,7 +11,8 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { users, currentUser, joinEvent, leaveEvent, deleteEvent } = useClub();
+  const { users, currentUser } = useMembers();
+  const { joinEvent, leaveEvent, deleteEvent } = useEvents();
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   

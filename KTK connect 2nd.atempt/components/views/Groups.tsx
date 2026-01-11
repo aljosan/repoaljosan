@@ -1,11 +1,11 @@
 import React from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useMembers } from '../../context/ClubContext';
 import { UserRole } from '../../types';
 import AdminGroupsView from './AdminGroupsView';
 import MemberGroupsView from './MemberGroupsView';
 
 const Groups: React.FC = () => {
-  const { currentUser } = useClub();
+  const { currentUser } = useMembers();
 
   if (currentUser.role === UserRole.Admin) {
     return <AdminGroupsView />;

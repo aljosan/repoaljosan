@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useBookings, useMembers } from '../../context/ClubContext';
 import { Booking } from '../../types';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
 import Modal from '../ui/Modal';
 
 const MyBookingsList: React.FC = () => {
-    const { currentUser, allBookings, cancelBooking } = useClub();
+    const { currentUser } = useMembers();
+    const { allBookings, cancelBooking } = useBookings();
     const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
     const myUpcomingBookings = allBookings.filter(b => 

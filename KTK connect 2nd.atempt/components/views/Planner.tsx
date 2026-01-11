@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, closestCenter } from '@dnd-kit/core';
-import { useClub } from '../../context/ClubContext';
-import { UserRole, Booking, Group, User, ConflictCheckResult } from '../../types';
+import { useBookings, useGroups, useMembers } from '../../context/ClubContext';
+import { UserRole, Booking, User, ConflictCheckResult } from '../../types';
 import GroupSidebar from '../planner/GroupSidebar';
 import PlannerGrid from '../planner/PlannerGrid';
 import Icon from '../ui/Icon';
@@ -26,7 +26,9 @@ type EditTarget = {
 }
 
 const Planner: React.FC = () => {
-    const { currentUser, allBookings, groups, users, blockedSlots, createGroupBooking, updateBooking, cancelBooking, addRecurringBooking, blockSlot, getBookingConflicts } = useClub();
+    const { currentUser, users } = useMembers();
+    const { groups } = useGroups();
+    const { allBookings, blockedSlots, createGroupBooking, updateBooking, cancelBooking, addRecurringBooking, blockSlot, getBookingConflicts } = useBookings();
     
     const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
     const [selectedDate, setSelectedDate] = useState(new Date());
