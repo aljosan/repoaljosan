@@ -2,7 +2,7 @@ import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Booking } from '@/types';
-import { useClub } from '@/context/ClubContext';
+import { useGroups } from '@/context/ClubContext';
 import Icon from '@/components/ui/Icon';
 import { getGroupColorHex } from '@/utils/color';
 import LinkifiedText from '@/components/ui/LinkifiedText';
@@ -17,7 +17,7 @@ interface ResizableSessionCardProps {
 }
 
 const ResizableSessionCard: React.FC<ResizableSessionCardProps> = ({ booking, positionAndHeight, onEdit, onSelect, isSelected, onDoubleClick }) => {
-  const { groups } = useClub();
+  const { groups } = useGroups();
   const group = groups.find(g => g.id === booking.groupId);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({

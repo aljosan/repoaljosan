@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { useClub } from '../../context/ClubContext';
+import { useBookings } from '../../context/ClubContext';
 import Icon from '../ui/Icon';
 
 interface TemplateModalProps {
@@ -12,7 +12,7 @@ interface TemplateModalProps {
 type Tab = 'apply' | 'save';
 
 const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
-    const { scheduleTemplates, allBookings, saveScheduleAsTemplate, applyScheduleTemplate } = useClub();
+    const { scheduleTemplates, allBookings, saveScheduleAsTemplate, applyScheduleTemplate } = useBookings();
     const [activeTab, setActiveTab] = useState<Tab>('apply');
     const [templateName, setTemplateName] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState<string>(scheduleTemplates[0]?.id || '');

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useEvents, useMembers } from '../../context/ClubContext';
 import EventCard from '../dashboard/EventCard';
 import AddEventModal from '../dashboard/AddEventModal';
 import { ClubEvent, UserRole } from '../../types';
@@ -7,7 +7,8 @@ import Button from '../ui/Button';
 import Icon from '../ui/Icon';
 
 const Dashboard: React.FC = () => {
-  const { events, currentUser, addEvent } = useClub();
+  const { events, addEvent } = useEvents();
+  const { currentUser } = useMembers();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const isAdminOrCoach = currentUser.role === UserRole.Admin || currentUser.role === UserRole.Coach;

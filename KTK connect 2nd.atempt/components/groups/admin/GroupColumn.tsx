@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { User, Group } from '../../../types';
-import { useClub } from '../../../context/ClubContext';
+import { User } from '../../../types';
+import { useGroups } from '../../../context/ClubContext';
 import MemberCard from './MemberCard';
 import Icon from '../../ui/Icon';
 import Modal from '../../ui/Modal';
@@ -17,7 +17,7 @@ interface GroupColumnProps {
 }
 
 const GroupColumn: React.FC<GroupColumnProps> = ({ id, title, description, members, isDraggedOver, setDraggedOverColumn, onEdit }) => {
-  const { moveUserToGroup, deleteGroup } = useClub();
+  const { moveUserToGroup, deleteGroup } = useGroups();
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {

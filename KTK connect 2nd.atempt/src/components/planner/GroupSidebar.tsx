@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useClub } from '@/context/ClubContext';
+import { useBookings, useGroups } from '@/context/ClubContext';
 import DraggableGroupCard from '@/components/planner/DraggableGroupCard';
 import Icon from '@/components/ui/Icon';
 import { Group } from '@/types';
@@ -9,7 +9,8 @@ interface GroupSidebarProps {
 }
 
 const GroupSidebar: React.FC<GroupSidebarProps> = ({ selectedDate }) => {
-    const { groups, allBookings } = useClub();
+    const { groups } = useGroups();
+    const { allBookings } = useBookings();
     const [isUnscheduledOpen, setUnscheduledOpen] = useState(true);
     const [isScheduledOpen, setScheduledOpen] = useState(true);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Booking, BlockedSlot } from '../../types';
-import { useClub } from '../../context/ClubContext';
+import { useGroups } from '../../context/ClubContext';
 import { getGroupColorHex } from '../../utils/color';
 import Icon from '../ui/Icon';
 
@@ -11,7 +11,7 @@ interface PlannerWeekGridProps {
 }
 
 const PlannerWeekGrid: React.FC<PlannerWeekGridProps> = ({ startDate, bookings, blockedSlots }) => {
-    const { groups } = useClub();
+    const { groups } = useGroups();
     const days = Array.from({ length: 7 }, (_, i) => {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);

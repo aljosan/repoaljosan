@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useNotifications } from '../../context/ClubContext';
 import Icon from '../ui/Icon';
 
 const NotificationDropdown: React.FC = () => {
-  const { notifications, markNotificationAsRead } = useClub();
+  const { notifications, markNotificationAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

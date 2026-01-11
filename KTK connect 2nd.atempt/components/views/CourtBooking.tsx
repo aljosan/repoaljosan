@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import BookingGrid from '../booking/BookingGrid';
-import { useClub } from '../../context/ClubContext';
+import { useBookings } from '../../context/ClubContext';
 import BookingModal from '../booking/BookingModal';
 import { Booking } from '../../types';
 import MyBookingsList from '../booking/MyBookingsList';
@@ -13,7 +13,7 @@ const CourtBooking: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<BookingViewTab>('book');
   const [selectedSlot, setSelectedSlot] = useState<{ courtId: number; startTime: Date } | null>(null);
-  const { addBooking, currentUser } = useClub();
+  const { addBooking } = useBookings();
 
   const dates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();

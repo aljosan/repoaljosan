@@ -3,7 +3,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { BOOKING_COST_PER_HOUR, INDOOR_COURTS } from '../../constants';
 import { Booking } from '../../types';
-import { useClub } from '../../context/ClubContext';
+import { useMembers } from '../../context/ClubContext';
 import Icon from '../ui/Icon';
 
 interface BookingModalProps {
@@ -16,7 +16,7 @@ interface BookingModalProps {
 type ModalStep = 'confirm' | 'pay' | 'success' | 'error';
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, slot, onConfirmBooking }) => {
-  const { currentUser } = useClub();
+  const { currentUser } = useMembers();
   const [step, setStep] = useState<ModalStep>('confirm');
   const [errorMessage, setErrorMessage] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);

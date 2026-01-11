@@ -1,5 +1,5 @@
 import React from 'react';
-import { useClub } from '../../context/ClubContext';
+import { useBookings, useGroups, useMembers } from '../../context/ClubContext';
 import { INDOOR_COURTS, OUTDOOR_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '../../constants';
 import { User, Booking, Group, BlockedSlot } from '../../types';
 import Icon from '../ui/Icon';
@@ -10,7 +10,9 @@ interface BookingGridProps {
 }
 
 const BookingGrid: React.FC<BookingGridProps> = ({ selectedDate, onSlotClick }) => {
-  const { allBookings, users, groups, blockedSlots } = useClub();
+  const { allBookings, blockedSlots } = useBookings();
+  const { users } = useMembers();
+  const { groups } = useGroups();
   
   const SLOT_DURATION_MINUTES = 30;
   const slotStartTimes: Date[] = [];

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createCoachChatSession } from '../../services/geminiService';
 import { Chat, GenerateContentResponse } from '@google/genai';
-import { useClub } from '../../context/ClubContext';
+import { useMembers } from '../../context/ClubContext';
 import Icon from '../ui/Icon';
 import Button from '../ui/Button';
 import { Avatar } from '../ui/Avatar';
@@ -13,7 +13,7 @@ interface ChatMessage {
 }
 
 const AICoach: React.FC = () => {
-  const { currentUser } = useClub();
+  const { currentUser } = useMembers();
   const [chatSession, setChatSession] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');

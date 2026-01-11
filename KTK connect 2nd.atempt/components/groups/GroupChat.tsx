@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Group } from '../../types';
-import { useClub } from '../../context/ClubContext';
+import { useGroups, useMembers } from '../../context/ClubContext';
 import { Avatar } from '../ui/Avatar';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
@@ -10,7 +10,8 @@ interface GroupChatProps {
 }
 
 const GroupChat: React.FC<GroupChatProps> = ({ group }) => {
-  const { users, currentUser, addMessageToGroup } = useClub();
+  const { users, currentUser } = useMembers();
+  const { addMessageToGroup } = useGroups();
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
