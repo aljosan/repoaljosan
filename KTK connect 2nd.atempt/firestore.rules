@@ -1,0 +1,226 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // --------------------------------------------------
+    // Helper functions
+    // --------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function userRole() {
+      return userDoc(request.auth.uid).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userRole() == 'admin';
+    }
+
+    function isCoach() {
+      return isSignedIn() && userRole() == 'coach';
+    }
+
+    function isPlayer() {
+      return isSignedIn() && userRole() == 'player';
+    }
+
+    function isParent() {
+      return isSignedIn() && userRole() == 'parent';
+    }
+
+    function coachGroupIds() {
+      return userDoc(request.auth.uid).data.coachGroupIds;
+    }
+
+    function linkedPlayerIds() {
+      return userDoc(request.auth.uid).data.linkedPlayerIds;
+    }
+
+    function isCoachGroup(groupId) {
+      return isCoach() && coachGroupIds() is list && coachGroupIds().hasAny([groupId]);
+    }
+
+    function isLinkedPlayer(playerId) {
+      return isParent() && linkedPlayerIds() is list && linkedPlayerIds().hasAny([playerId]);
+    }
+
+    function groupDoc(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId));
+    }
+
+    function sessionDoc(sessionId) {
+      return get(/databases/$(database)/documents/sessions/$(sessionId));
+    }
+
+    function playerInGroup(groupId, playerId) {
+      return groupDoc(groupId).data.playerIds is list
+        && groupDoc(groupId).data.playerIds.hasAny([playerId]);
+    }
+
+    function linkedPlayerInGroup(groupId) {
+      return linkedPlayerIds() is list
+        && groupDoc(groupId).data.playerIds is list
+        && groupDoc(groupId).data.playerIds.hasAny(linkedPlayerIds());
+    }
+
+    // --------------------------------------------------
+    // Users
+    // --------------------------------------------------
+    match /users/{uid} {
+      // Users can read their own profile; admins can read all.
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      // Only admins manage user documents to enforce role control.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Courts
+    // --------------------------------------------------
+    match /courts/{courtId} {
+      // All signed-in users can read court inventory.
+      allow read: if isSignedIn();
+      // Only admins can manage courts.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Booking rules
+    // --------------------------------------------------
+    match /bookingRules/{ruleId} {
+      // Rules are visible to all authenticated users.
+      allow read: if isSignedIn();
+      // Only admins can manage booking rules.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Groups
+    // --------------------------------------------------
+    match /groups/{groupId} {
+      // Admins can see all groups; coaches and players see only their groups; parents see linked groups.
+      allow read: if isAdmin()
+        || isCoachGroup(groupId)
+        || (isPlayer() && playerInGroup(groupId, request.auth.uid))
+        || (isParent() && linkedPlayerInGroup(groupId));
+      // Only admins manage group creation and roster changes.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Sessions
+    // --------------------------------------------------
+    match /sessions/{sessionId} {
+      // Read sessions only when you are allowed to see the group.
+      allow read: if isAdmin()
+        || isCoachGroup(resource.data.groupId)
+        || (isPlayer() && playerInGroup(resource.data.groupId, request.auth.uid))
+        || (isParent() && linkedPlayerInGroup(resource.data.groupId));
+      // Admins can write any session; coaches only for their groups.
+      allow create: if isAdmin()
+        || (isCoach() && request.resource.data.groupId is string
+          && isCoachGroup(request.resource.data.groupId));
+      allow update: if isAdmin()
+        || (isCoach()
+          && request.resource.data.groupId == resource.data.groupId
+          && isCoachGroup(resource.data.groupId));
+      allow delete: if isAdmin()
+        || (isCoach() && isCoachGroup(resource.data.groupId));
+    }
+
+    // --------------------------------------------------
+    // Attendance
+    // --------------------------------------------------
+    match /attendance/{attendanceId} {
+      // Admins and relevant coaches can read attendance; players/parents only for linked players.
+      allow read: if isAdmin()
+        || (isCoach()
+          && isCoachGroup(sessionDoc(resource.data.sessionId).data.groupId))
+        || (isPlayer() && resource.data.playerId == request.auth.uid)
+        || (isParent() && isLinkedPlayer(resource.data.playerId));
+      // Admins and coaches can record attendance for their sessions.
+      allow create: if isAdmin()
+        || (isCoach()
+          && sessionDoc(request.resource.data.sessionId).data.groupId is string
+          && isCoachGroup(sessionDoc(request.resource.data.sessionId).data.groupId));
+      allow update: if isAdmin()
+        || (isCoach()
+          && sessionDoc(resource.data.sessionId).data.groupId is string
+          && isCoachGroup(sessionDoc(resource.data.sessionId).data.groupId));
+      allow delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Bookings
+    // --------------------------------------------------
+    match /bookings/{bookingId} {
+      // Users can read their own bookings; parents can read linked player bookings.
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid)
+        || (isParent() && isLinkedPlayer(resource.data.userId));
+      // Users can only create bookings for themselves with valid time range.
+      allow create: if isAdmin()
+        || (isSignedIn()
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.startTime < request.resource.data.endTime
+          && request.resource.data.status in ['active', 'cancelled']);
+      // Users can only cancel their own future bookings without altering core fields.
+      allow update: if isAdmin()
+        || (isSignedIn()
+          && resource.data.userId == request.auth.uid
+          && resource.data.status == 'active'
+          && request.resource.data.status == 'cancelled'
+          && resource.data.startTime > request.time
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.courtId == resource.data.courtId
+          && request.resource.data.startTime == resource.data.startTime
+          && request.resource.data.endTime == resource.data.endTime);
+      // Deletions are admin-only to preserve audit history.
+      allow delete: if isAdmin();
+    }
+
+    // --------------------------------------------------
+    // Announcements
+    // --------------------------------------------------
+    match /announcements/{announcementId} {
+      // Announcements are visible to users within the related group or to all if global.
+      allow read: if isAdmin()
+        || (resource.data.groupId == null && isSignedIn())
+        || (resource.data.groupId != null && isCoachGroup(resource.data.groupId))
+        || (resource.data.groupId != null
+          && isPlayer()
+          && playerInGroup(resource.data.groupId, request.auth.uid))
+        || (resource.data.groupId != null
+          && isParent()
+          && linkedPlayerInGroup(resource.data.groupId));
+      // Admins and coaches can publish announcements for their groups or globally.
+      allow create: if isAdmin()
+        || (isCoach()
+          && request.resource.data.authorId == request.auth.uid
+          && (request.resource.data.groupId == null
+            || isCoachGroup(request.resource.data.groupId)));
+      allow update: if isAdmin()
+        || (isCoach()
+          && resource.data.authorId == request.auth.uid
+          && request.resource.data.authorId == resource.data.authorId
+          && (resource.data.groupId == null || isCoachGroup(resource.data.groupId)));
+      allow delete: if isAdmin()
+        || (isCoach() && resource.data.authorId == request.auth.uid);
+    }
+
+    // --------------------------------------------------
+    // Notifications
+    // --------------------------------------------------
+    match /notifications/{notificationId} {
+      // Users read their own notifications; parents can also read linked players.
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid)
+        || (isParent() && isLinkedPlayer(resource.data.userId));
+      // Only admins can create or manage notifications.
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
