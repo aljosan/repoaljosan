@@ -19,10 +19,9 @@ export interface SessionRecord {
   groupId: string;
   courtId: string;
   startTime: Timestamp;
-  endTime?: Timestamp;
   durationMinutes: number;
   focus: FocusType;
-  notes?: string | null;
+  notes?: string;
   createdBy: string;
   createdAt: Timestamp;
   updatedAt?: Timestamp;
@@ -147,9 +146,6 @@ const ensureTimestamp = (startTime: Timestamp) => {
 const sessionEndTime = (startTime: Timestamp, durationMinutes: number) =>
   Timestamp.fromMillis(startTime.toMillis() + durationMinutes * 60 * 1000);
 
-const resolvedSessionEndTime = (session: SessionRecord) =>
-  session.endTime ?? sessionEndTime(session.startTime, session.durationMinutes);
-
 const chunk = <T,>(items: T[], size: number) =>
   items.reduce<T[][]>((acc, item, index) => {
     if (index % size === 0) {
@@ -214,14 +210,9 @@ const loadGroupIdsForLinkedPlayers = async (linkedPlayerIds: string[]) => {
   if (linkedPlayerIds.length === 0) {
     return [];
   }
-  const batches = chunk(linkedPlayerIds, 10);
-  const groupIds = new Set<string>();
-  for (const batch of batches) {
-    const groupQuery = query(groupsCollection, where('playerIds', 'array-contains-any', batch));
-    const snapshot = await getDocs(groupQuery);
-    snapshot.docs.forEach((docSnap) => groupIds.add(docSnap.id));
-  }
-  return Array.from(groupIds);
+  const groupQuery = query(groupsCollection, where('playerIds', 'array-contains-any', linkedPlayerIds.slice(0, 10)));
+  const snapshot = await getDocs(groupQuery);
+  return snapshot.docs.map((docSnap) => docSnap.id);
 };
 
 const querySessionsForGroupIds = async (groupIds: string[], start: Timestamp, end: Timestamp) => {
@@ -252,7 +243,7 @@ const detectCourtConflict = (sessions: SessionRecord[], candidateStart: Timestam
       return false;
     }
     const existingStart = session.startTime.toMillis();
-    const existingEnd = resolvedSessionEndTime(session).toMillis();
+    const existingEnd = sessionEndTime(session.startTime, session.durationMinutes).toMillis();
     return existingStart < candidateEndMs && existingEnd > candidateStartMs;
   });
 };
@@ -267,19 +258,11 @@ export async function createSession(params: CreateSessionParams) {
   validateFocus(focus);
 
   const profile = await getUserProfile(actorUid);
+  assertActorCanManageGroup(profile.role, actorUid, groupId, profile.coachGroupIds);
 
-  const createdSession = await runTransaction(db, async (transaction) => {
-    const groupRef = doc(groupsCollection, groupId);
-    const groupSnapshot = await transaction.get(groupRef);
-    if (!groupSnapshot.exists()) {
-      throw new NotFoundError('Group not found.');
-    }
-    const group = groupSnapshot.data() as { coachId: string; playerIds: string[] };
-    if (profile.role !== 'admin' && group.coachId !== actorUid) {
-      throw new UnauthorizedSessionError('Coach does not have access to this group.');
-    }
-    assertActorCanManageGroup(profile.role, actorUid, groupId, profile.coachGroupIds);
+  await getGroup(groupId);
 
+  return runTransaction(db, async (transaction) => {
     const newStart = startTime;
     const newEnd = sessionEndTime(startTime, durationMinutes);
     const windowStart = Timestamp.fromMillis(newStart.toMillis() - MAX_DURATION_MS);
@@ -304,7 +287,6 @@ export async function createSession(params: CreateSessionParams) {
       groupId,
       courtId,
       startTime,
-      endTime: newEnd,
       durationMinutes,
       focus,
       notes: notes ?? null,
@@ -314,12 +296,6 @@ export async function createSession(params: CreateSessionParams) {
     transaction.set(sessionRef, sessionData);
     return { id: sessionRef.id, ...sessionData };
   });
-
-  const createdSnapshot = await getDoc(doc(sessionsCollection, createdSession.id));
-  if (!createdSnapshot.exists()) {
-    throw new NotFoundError('Session not found after creation.');
-  }
-  return { id: createdSnapshot.id, ...(createdSnapshot.data() as SessionRecord) };
 }
 
 export async function updateSession(params: UpdateSessionParams) {
@@ -331,52 +307,40 @@ export async function updateSession(params: UpdateSessionParams) {
     throw new SessionValidationError('No updates provided.');
   }
 
-  const profile = await getUserProfile(actorUid);
   const sessionRef = doc(sessionsCollection, sessionId);
+  const sessionSnapshot = await getDoc(sessionRef);
+  if (!sessionSnapshot.exists()) {
+    throw new NotFoundError('Session not found.');
+  }
+  const existingSession = sessionSnapshot.data() as SessionRecord;
 
-  await runTransaction(db, async (transaction) => {
-    const sessionSnapshot = await transaction.get(sessionRef);
-    if (!sessionSnapshot.exists()) {
-      throw new NotFoundError('Session not found.');
-    }
-    const existingSession = sessionSnapshot.data() as SessionRecord;
+  const profile = await getUserProfile(actorUid);
+  assertActorCanManageGroup(profile.role, actorUid, existingSession.groupId, profile.coachGroupIds);
 
-    const groupRef = doc(groupsCollection, existingSession.groupId);
-    const groupSnapshot = await transaction.get(groupRef);
-    if (!groupSnapshot.exists()) {
-      throw new NotFoundError('Group not found.');
-    }
-    const group = groupSnapshot.data() as { coachId: string; playerIds: string[] };
-    if (profile.role !== 'admin' && group.coachId !== actorUid) {
-      throw new UnauthorizedSessionError('Coach does not have access to this group.');
-    }
-    assertActorCanManageGroup(profile.role, actorUid, existingSession.groupId, profile.coachGroupIds);
+  const nextStart = patch.startTime ?? existingSession.startTime;
+  const nextDuration = patch.durationMinutes ?? existingSession.durationMinutes;
+  const nextCourtId = patch.courtId ?? existingSession.courtId;
+  const nextFocus = patch.focus ?? existingSession.focus;
 
-    const nextStart = patch.startTime ?? existingSession.startTime;
-    const nextDuration = patch.durationMinutes ?? existingSession.durationMinutes;
-    const nextCourtId = patch.courtId ?? existingSession.courtId;
-    const nextFocus = patch.focus ?? existingSession.focus;
+  ensureTimestamp(nextStart);
+  validateDuration(nextDuration);
+  validateFocus(nextFocus);
 
-    ensureTimestamp(nextStart);
-    validateDuration(nextDuration);
-    validateFocus(nextFocus);
+  const updates: Record<string, unknown> = {
+    updatedAt: serverTimestamp(),
+  };
+  if (patch.courtId) updates.courtId = patch.courtId;
+  if (patch.startTime) updates.startTime = patch.startTime;
+  if (patch.durationMinutes) updates.durationMinutes = patch.durationMinutes;
+  if (patch.focus) updates.focus = patch.focus;
+  if (patch.notes !== undefined) updates.notes = patch.notes ?? null;
 
-    const updates: Record<string, unknown> = {
-      updatedAt: serverTimestamp(),
-    };
-    if (patch.courtId) updates.courtId = patch.courtId;
-    if (patch.startTime) updates.startTime = patch.startTime;
-    if (patch.durationMinutes) updates.durationMinutes = patch.durationMinutes;
-    if (patch.focus) updates.focus = patch.focus;
-    if (patch.notes !== undefined) updates.notes = patch.notes ?? null;
+  const needsConflictCheck =
+    patch.courtId !== undefined || patch.startTime !== undefined || patch.durationMinutes !== undefined;
 
-    const newEnd = sessionEndTime(nextStart, nextDuration);
-    updates.endTime = newEnd;
-
-    const needsConflictCheck =
-      patch.courtId !== undefined || patch.startTime !== undefined || patch.durationMinutes !== undefined;
-
-    if (needsConflictCheck) {
+  if (needsConflictCheck) {
+    return runTransaction(db, async (transaction) => {
+      const newEnd = sessionEndTime(nextStart, nextDuration);
       const windowStart = Timestamp.fromMillis(nextStart.toMillis() - MAX_DURATION_MS);
       const conflictQuery = query(
         sessionsCollection,
@@ -393,16 +357,15 @@ export async function updateSession(params: UpdateSessionParams) {
       if (detectCourtConflict(existingSessions, nextStart, nextDuration, sessionId)) {
         throw new SessionConflictError();
       }
-    }
+      transaction.update(sessionRef, updates);
+      return { ...existingSession, ...updates, id: sessionId } as SessionRecord;
+    });
+  }
 
+  await runTransaction(db, async (transaction) => {
     transaction.update(sessionRef, updates);
   });
-
-  const updatedSnapshot = await getDoc(sessionRef);
-  if (!updatedSnapshot.exists()) {
-    throw new NotFoundError('Session not found after update.');
-  }
-  return { id: updatedSnapshot.id, ...(updatedSnapshot.data() as SessionRecord) };
+  return { ...existingSession, ...updates, id: sessionId } as SessionRecord;
 }
 
 export async function deleteSession(params: DeleteSessionParams) {
@@ -411,22 +374,14 @@ export async function deleteSession(params: DeleteSessionParams) {
     throw new UnauthorizedSessionError('Actor UID is required.');
   }
   const sessionRef = doc(sessionsCollection, sessionId);
+  const snapshot = await getDoc(sessionRef);
+  if (!snapshot.exists()) {
+    throw new NotFoundError('Session not found.');
+  }
+  const session = snapshot.data() as SessionRecord;
   const profile = await getUserProfile(actorUid);
+  assertActorCanManageGroup(profile.role, actorUid, session.groupId, profile.coachGroupIds);
   await runTransaction(db, async (transaction) => {
-    const snapshot = await transaction.get(sessionRef);
-    if (!snapshot.exists()) {
-      throw new NotFoundError('Session not found.');
-    }
-    const session = snapshot.data() as SessionRecord;
-    const groupSnapshot = await transaction.get(doc(groupsCollection, session.groupId));
-    if (!groupSnapshot.exists()) {
-      throw new NotFoundError('Group not found.');
-    }
-    const group = groupSnapshot.data() as { coachId: string; playerIds: string[] };
-    if (profile.role !== 'admin' && group.coachId !== actorUid) {
-      throw new UnauthorizedSessionError('Coach does not have access to this group.');
-    }
-    assertActorCanManageGroup(profile.role, actorUid, session.groupId, profile.coachGroupIds);
     transaction.delete(sessionRef);
   });
 }
