@@ -33,23 +33,37 @@ This GitHub repository contains the KTK Connect app inside:
 Current project-level structure observed from GitHub:
 
 - `package.json` - project scripts and dependencies
+- `index.html` - Vite HTML entry; currently loads `/src/main.tsx`
+- `vite.config.ts` - Vite config with `@` mapped to `./src`
+- `jest.config.ts` - Jest test configuration
+- `firestore.rules` - Firestore security rules
+- `App.tsx` and `index.tsx` - older root-level app entry files; not the active Vite entrypoint while `index.html` points to `/src/main.tsx`
 - `components/` - existing component folder at the project root
 - `context/` - existing React Context folder at the project root
 - `hooks/` - existing custom hooks folder at the project root
 - `services/` - existing service layer folder at the project root
-- `src/` - application source folder
+- `src/app/` - active React Router route tree in `src/app/App.tsx`
+- `src/components/` - newer reusable components used by the active `src` app
+- `src/contexts/` - newer React Context providers, including auth
+- `src/data/` - mock data
+- `src/hooks/` - newer custom hooks
+- `src/pages/` - active route-level pages
+- `src/services/` - Firebase-backed service modules
+- `src/types/` - newer domain and role types
+- `src/utils/` - newer shared utilities
+- `src/__tests__/` and `src/test/` - Jest tests and test setup
 - `utils/` - existing shared utility folder at the project root
 
 Recommended direction without moving files:
 
 - Keep using the current structure unless a task explicitly asks for a migration.
+- Treat `src/main.tsx` and `src/app/App.tsx` as the active application path.
+- Treat root `App.tsx`, root `index.tsx`, root `components/`, root `context/`, root `hooks/`, root `services/`, root `types.ts`, and root `utils/` as legacy or shared code until a task intentionally consolidates them.
 - Put route-level React screens under `src/pages/` when adding new pages.
-- Put app shell and route setup under `src/app/` if that pattern is already present.
-- Keep reusable components in the existing `components/` folder or under `src/components/`, matching the nearby code for the feature being changed.
-- Keep shared React state in `context/` and reusable state logic in `hooks/`.
-- Keep data access and persistence boundaries in `services/`.
-- Keep pure helper functions in `utils/`.
-- Add mock data in a dedicated `mocks/`, `data/`, or feature-local data file instead of embedding large fixtures inside components.
+- Put active app shell and routing changes in `src/app/App.tsx`.
+- Prefer `src/components/`, `src/contexts/`, `src/hooks/`, `src/services/`, `src/types/`, `src/utils/`, and `src/data/` for new active app code.
+- Edit root-level folders only when the existing feature or test already imports them.
+- Add mock data in `src/data/` or a feature-local data file instead of embedding large fixtures inside components.
 
 ## Available Commands
 
@@ -66,10 +80,11 @@ Do not invent new commands in documentation or automation unless `package.json` 
 
 ## Architecture Rules
 
-- Keep the app frontend-first for v1. Use mock data where live persistence is not required.
+- Keep the app frontend-first for v1, but respect the existing Firebase Auth, Firestore services, and `firestore.rules` already in the repo.
+- Use `src/data/mockData.ts` or local mock state where live persistence is not required.
 - Keep backend integrations behind service modules. React components should not import Firebase, Supabase, or database SDKs directly.
 - Keep service APIs backend-ready: return typed data, isolate persistence details, and avoid leaking mock implementation details into UI code.
-- Use React Router for app navigation and protected routes.
+- Use React Router for app navigation and protected routes. The active routes currently live in `src/app/App.tsx`.
 - Use React Context for shared app or feature state that must be available across multiple screens.
 - Prefer custom hooks for reusable UI state, data access orchestration, filtering, sorting, and derived data.
 - Use DnD Kit for drag-and-drop workflows such as coach planning, group assignment, court scheduling, and roster ordering.
@@ -133,6 +148,7 @@ For v1, prefer complete mock-data user flows over partial live backend integrati
 - Use the real scripts from `package.json` when validation is needed.
 - For app changes, `npm run build` is the main production validation.
 - For testable behavior, run `npm run test` or the narrowest available test command.
+- Do not assume `npm run build` performs a separate TypeScript type-check; the current script is `vite build`.
 - For UI work, verify the relevant screen in a browser when a dev server is available.
 - For routing changes, check affected paths and protected-route behavior.
 - For DnD Kit work, verify pointer and keyboard interactions where practical.
