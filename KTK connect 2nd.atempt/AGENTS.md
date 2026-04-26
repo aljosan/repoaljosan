@@ -97,6 +97,7 @@ The real scripts currently defined in `KTK connect 2nd.atempt/package.json` are:
 
 - `npm run dev` - start the Vite development server
 - `npm run build` - build the Vite app
+- `npm run typecheck` - type-check the active `src/main.tsx` app graph with `tsconfig.typecheck.json`
 - `npm run preview` - preview the production build locally
 - `npm run test` - run Jest tests
 
@@ -173,6 +174,7 @@ For v1, prefer complete mock-data user flows over partial live backend integrati
 - Run lightweight validation first.
 - Use the real scripts from `package.json` when validation is needed.
 - For app changes, `npm run build` is the main production validation.
+- Run `npm run typecheck` for active-app TypeScript validation before broadening checks to legacy files.
 - For testable behavior, run `npm run test` or the narrowest available test command.
 - Do not assume `npm run build` performs a separate TypeScript type-check; the current script is `vite build`.
 - For UI work, verify the relevant screen in a browser when a dev server is available.

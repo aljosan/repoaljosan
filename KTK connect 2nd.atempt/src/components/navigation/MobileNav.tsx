@@ -6,13 +6,13 @@ interface MobileNavProps {
   role?: UserRole;
 }
 
-const items = [
+const items: Array<{ label: string; to: string; roles: UserRole[] }> = [
   { label: 'Home', to: '/', roles: ['admin', 'coach', 'player', 'parent'] },
   { label: 'Booking', to: '/booking', roles: ['admin', 'coach', 'player', 'parent'] },
   { label: 'Groups', to: '/groups', roles: ['admin', 'coach', 'parent'] },
   { label: 'Planner', to: '/planner', roles: ['admin', 'coach'] },
   { label: 'Admin', to: '/admin', roles: ['admin'] },
-] as const;
+];
 
 const MobileNav: React.FC<MobileNavProps> = ({ role }) => (
   <nav className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-slate-200 bg-white py-3 text-xs font-semibold text-slate-500 lg:hidden">
