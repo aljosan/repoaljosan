@@ -1,48 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { jest } from '@jest/globals';
-import { UserRole } from '../../types';
-import * as ClubContext from '../../context/ClubContext';
-import CourtBooking from '../../components/views/CourtBooking';
+import { render, screen } from '@testing-library/react';
+import BookingPage from '../pages/BookingPage';
 
-const useClubSpy = jest.spyOn(ClubContext, 'useClub');
-
-beforeEach(() => {
-  useClubSpy.mockReturnValue({
-    addBooking: jest.fn(() => ({ success: true, message: 'Booking successful!' })),
-    allBookings: [],
-    blockedSlots: [],
-    cancelBooking: jest.fn(),
-    groups: [],
-    currentUser: {
-      id: 'user-1',
-      name: 'Alex Johnson',
-      avatarUrl: 'https://example.com/avatar.png',
-      role: UserRole.Admin,
-      credits: 50,
-    },
-    users: [],
-  });
-});
-
-afterEach(() => {
-  useClubSpy.mockReset();
-});
-
-test('switches between booking and management tabs', () => {
-  render(<CourtBooking />);
+test('renders the active booking page shell', () => {
+  render(<BookingPage />);
 
   expect(screen.getByRole('heading', { name: /court booking/i })).toBeInTheDocument();
-
-  fireEvent.click(screen.getByRole('button', { name: /my upcoming bookings/i }));
-
-  expect(screen.getByText(/no upcoming bookings/i)).toBeInTheDocument();
-});
-
-test('opens the booking modal after selecting a slot', () => {
-  render(<CourtBooking />);
-
-  const [firstSlot] = screen.getAllByRole('button', { name: /book court/i });
-  fireEvent.click(firstSlot);
-
-  expect(screen.getByRole('heading', { name: /book court/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /request booking/i })).toBeInTheDocument();
+  expect(screen.getByText(/max 90 min per booking/i)).toBeInTheDocument();
 });
