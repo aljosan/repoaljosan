@@ -89,6 +89,8 @@ Likely inactive root-level legacy app files and folders:
 
 Some `src/` compatibility files re-export root-level modules so older copied code can still resolve imports. These are compatibility shims, not a signal to add new active code outside `src/`.
 
+The active `/planner` route currently renders `src/pages/PlannerPage.tsx`. Do not treat `src/components/views/Planner.tsx` or `src/components/planner/` as active planner code unless a task explicitly asks to migrate that copied planner tree.
+
 See `LEGACY_CODE.md` for the concise quarantine list.
 
 ## Available Commands
