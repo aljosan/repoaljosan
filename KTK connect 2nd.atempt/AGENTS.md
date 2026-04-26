@@ -65,6 +65,32 @@ Recommended direction without moving files:
 - Edit root-level folders only when the existing feature or test already imports them.
 - Add mock data in `src/data/` or a feature-local data file instead of embedding large fixtures inside components.
 
+## Active App Path And Legacy Code
+
+The active Vite app path is:
+
+1. `index.html`
+2. `src/main.tsx`
+3. `src/app/App.tsx`
+
+Future agents should treat this path as the source of truth for runtime behavior. Do not edit root-level legacy files when implementing active app features unless the task explicitly asks for a legacy migration or a test imports that file.
+
+Likely inactive root-level legacy app files and folders:
+
+- `App.tsx`
+- `index.tsx`
+- `components/`
+- `context/`
+- `hooks/`
+- `services/`
+- `types.ts`
+- `utils/`
+- `constants.ts`
+
+Some `src/` compatibility files re-export root-level modules so older copied code can still resolve imports. These are compatibility shims, not a signal to add new active code outside `src/`.
+
+See `LEGACY_CODE.md` for the concise quarantine list.
+
 ## Available Commands
 
 The real scripts currently defined in `KTK connect 2nd.atempt/package.json` are:
