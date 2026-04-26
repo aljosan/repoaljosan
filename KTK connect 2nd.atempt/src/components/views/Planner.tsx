@@ -14,7 +14,7 @@ import PlannerFilters from '../planner/PlannerFilters';
 import PlannerWeekGrid from '@/components/planner/PlannerWeekGrid';
 import { ALL_COURTS, BOOKING_END_HOUR, BOOKING_START_HOUR } from '@/constants';
 import BulkActionsToolbar from '../planner/BulkActionsToolbar';
-import { printSchedule } from '@/src/utils/print';
+import { printSchedule } from '@/utils/print';
 import AnalyticsModal from '../planner/AnalyticsModal';
 
 

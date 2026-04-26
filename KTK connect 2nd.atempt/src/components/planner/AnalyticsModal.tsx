@@ -4,8 +4,8 @@ import Button from '@/components/ui/Button';
 import { Booking, Group, User, UserRole } from '@/types';
 import { ALL_COURTS, BOOKING_START_HOUR, BOOKING_END_HOUR } from '@/constants';
 import Icon from '@/components/ui/Icon';
-import { printAnalytics } from '@/src/utils/print';
-import { exportToCSV } from '@/src/utils/csv';
+import { printAnalytics } from '@/utils/print';
+import { exportToCSV } from '@/utils/csv';
 
 interface AnalyticsModalProps {
   isOpen: boolean;
