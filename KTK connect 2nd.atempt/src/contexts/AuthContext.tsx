@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useEffect, useMemo, useState } from 
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types/models';
 import { fetchUserProfile, listenForAuthChanges, loginWithEmail, logout } from '../services/auth';
-import { firebaseConfigStatus } from '../services/firebase';
+import { firebaseConfigStatus, isMockAuthEnabled } from '../services/firebase';
 
 interface AuthContextValue {
   user: User | null;
@@ -28,7 +28,8 @@ const FirebaseConfigScreen = () => (
         <p>
           Create <code className="rounded bg-slate-800 px-1 py-0.5">.env.local</code> from{' '}
           <code className="rounded bg-slate-800 px-1 py-0.5">.env.example</code>, add the real
-          Firebase web app values, and restart the Vite dev server.
+          Firebase web app values, and restart the Vite dev server. For local UI inspection without
+          Firebase, set <code className="rounded bg-slate-800 px-1 py-0.5">VITE_USE_MOCK_AUTH=true</code>.
         </p>
 
         {firebaseConfigStatus.missingKeys.length > 0 && (
@@ -67,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isFirebaseConfigured = firebaseConfigStatus.isConfigured;
+  const isAuthAvailable = firebaseConfigStatus.isConfigured || isMockAuthEnabled;
 
   const handleAuthChange = useCallback(async (nextUser: User | null) => {
     setUser(nextUser);
@@ -81,24 +82,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
+    if (!isAuthAvailable) {
       setIsLoading(false);
       return undefined;
     }
 
     const unsubscribe = listenForAuthChanges(handleAuthChange);
     return () => unsubscribe();
-  }, [handleAuthChange, isFirebaseConfigured]);
+  }, [handleAuthChange, isAuthAvailable]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
-    await loginWithEmail(email, password);
-  }, []);
+    const nextUser = await loginWithEmail(email, password);
+    if (isMockAuthEnabled) {
+      await handleAuthChange(nextUser);
+    }
+  }, [handleAuthChange]);
 
   const signOut = useCallback(async () => {
     setIsLoading(true);
     await logout();
-  }, []);
+    if (isMockAuthEnabled) {
+      await handleAuthChange(null);
+    }
+  }, [handleAuthChange]);
 
   const value = useMemo(
     () => ({
@@ -111,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [user, profile, isLoading, signIn, signOut]
   );
 
-  if (!isFirebaseConfigured) {
+  if (!isAuthAvailable) {
     return <FirebaseConfigScreen />;
   }
 

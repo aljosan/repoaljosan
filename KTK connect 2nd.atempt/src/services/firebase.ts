@@ -2,6 +2,8 @@ import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 
+export const isMockAuthEnabled = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
+
 export const requiredFirebaseEnvKeys = [
   'VITE_FIREBASE_API_KEY',
   'VITE_FIREBASE_AUTH_DOMAIN',
@@ -46,7 +48,7 @@ let authInstance: Auth | null = null;
 let dbInstance: Firestore | null = null;
 let initializationError: string | null = null;
 
-if (missingKeys.length === 0 && placeholderKeys.length === 0) {
+if (!isMockAuthEnabled && missingKeys.length === 0 && placeholderKeys.length === 0) {
   try {
     appInstance = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     authInstance = getAuth(appInstance);
@@ -58,6 +60,7 @@ if (missingKeys.length === 0 && placeholderKeys.length === 0) {
 
 export const firebaseConfigStatus = {
   isConfigured: authInstance !== null && dbInstance !== null,
+  isMockAuthEnabled,
   requiredKeys: requiredFirebaseEnvKeys,
   missingKeys,
   placeholderKeys,
